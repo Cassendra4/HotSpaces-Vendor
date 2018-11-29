@@ -14,7 +14,8 @@
           "0136c15c-311e-415a-ad68-78090bf12541",
           "fee713c1-57ce-4563-8763-b5987d956e02",
           "9b90313d-8c54-42b1-9115-3b8a7826b663",
-          "dac9deff-34fa-46f9-81b9-d82feaf60240"
+          "dac9deff-34fa-46f9-81b9-d82feaf60240",
+          "4ed6d4c5-d54d-482b-b03a-2232e44d86aa"
         ],
         "isRemovable": false,
         "filePath": "HotSpaces-Vendor"
@@ -89,13 +90,13 @@
       "0136c15c-311e-415a-ad68-78090bf12541": {
         "id": "0136c15c-311e-415a-ad68-78090bf12541",
         "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
-        "name": "addPromo.js",
+        "name": "addPromotion.js",
         "type": "LAMBDA_FILE",
         "isDirectory": false,
         "children": [],
         "isRemovable": true,
-        "filePath": "HotSpaces-Vendor/addPromo.js",
-        "code": "exports.handler = function(event, context, callback) {\n    \n    callback(null, {\"message\": \"Successfully executed\"});\n}",
+        "filePath": "HotSpaces-Vendor/addPromotion.js",
+        "code": "let dynamoDBService = require('./dynamoDbService');\n\nexports.handler = function(event, context, callback) {\n    \n    dynamoDBService.addPromo(promoData)\n        .then(function (data) {\n        console.log(\"Success\", data);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 200,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": JSON.stringify(promoData)\n            });\n        }).catch(function (err) {\n            console.log(\"Error\", err);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": err.message\n            });\n        });\n        \n}",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -106,12 +107,12 @@
       "fee713c1-57ce-4563-8763-b5987d956e02": {
         "id": "fee713c1-57ce-4563-8763-b5987d956e02",
         "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
-        "name": "getPromo.js",
+        "name": "getPromotion.js",
         "type": "LAMBDA_FILE",
         "isDirectory": false,
         "children": [],
         "isRemovable": true,
-        "filePath": "HotSpaces-Vendor/getPromo.js",
+        "filePath": "HotSpaces-Vendor/getPromotion.js",
         "code": "exports.handler = function(event, context, callback) {\n    \n    callback(null, {\"message\": \"Successfully executed\"});\n}",
         "triggers": [],
         "config": {
@@ -123,12 +124,12 @@
       "9b90313d-8c54-42b1-9115-3b8a7826b663": {
         "id": "9b90313d-8c54-42b1-9115-3b8a7826b663",
         "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
-        "name": "deletePromo.js",
+        "name": "deletePromotion.js",
         "type": "LAMBDA_FILE",
         "isDirectory": false,
         "children": [],
         "isRemovable": true,
-        "filePath": "HotSpaces-Vendor/deletePromo.js",
+        "filePath": "HotSpaces-Vendor/deletePromotion.js",
         "code": "exports.handler = function(event, context, callback) {\n    \n    callback(null, {\"message\": \"Successfully executed\"});\n}",
         "triggers": [],
         "config": {
@@ -140,22 +141,42 @@
       "dac9deff-34fa-46f9-81b9-d82feaf60240": {
         "id": "dac9deff-34fa-46f9-81b9-d82feaf60240",
         "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
-        "name": "updatePromo.js",
+        "name": "updatePromotion.js",
         "type": "LAMBDA_FILE",
         "isDirectory": false,
         "children": [],
         "isRemovable": true,
-        "filePath": "HotSpaces-Vendor/updatePromo.js",
-        "code": "exports.handler = function(event, context, callback) {\n    \n    callback(null, {\"message\": \"Successfully executed\"});\n}",
+        "filePath": "HotSpaces-Vendor/updatePromotion.js",
+        "code": "exports.handler = function(event, context, callback) {\n    \n     let timestamp = Math.round((new Date()).getTime() / 1000);\n    // console.log(timestamp);\n    let body = JSON.parse(event.body);\n    console.log(body)\n    let promoData = {\n        promoId : uuidv4(),\n        vendorId : body.vendorId,\n        offerType : body.offerType,\n        discount : body.discount,\n        startDate : body.startDate,\n        endDate : body.endDate,\n        startTime: body.startTime,\n        endTime: body.endTime,\n        selectedDays : body.selectedDays,\n        description : body.description,\n        title : body.title,\n        unitPrice : body.unitPrice,\n        imgUrl : body.imgUrls,\n        terms : body.terms,\n        businessType : body.businessType,\n        timestamp: timestamp,\n        locationBox: body.locationBox,\n        latNLong: body.latNLong\n    };\n    \n}",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
           "timeout": 60,
           "memory": 128
         }
+      },
+      "4ed6d4c5-d54d-482b-b03a-2232e44d86aa": {
+        "id": "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
+        "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
+        "name": "dynamoDBService.js",
+        "type": "JS_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "HotSpaces-Vendor/dynamoDBService.js",
+        "code": "let AWS = require('aws-sdk');\nconst ddb = new AWS.DynamoDB.DocumentClient();\n\nmodule.exports = {\n\n    getUser: function (userId) {\n        return ddb.query({\n            TableName: 'HS_user',\n            ExpressionAttributeValues: {\n                ':user_id': userId\n            },\n            KeyConditionExpression: 'user_id = :user_id'\n        }).promise()\n\n    },\n\n    /*\n     userData={\n         name : string,\n         role : string,\n         vender_id : string\n     }\n     */\n    addUser: function (userData) {\n        let userId = userData.uid;\n        let name = userData.name;\n        let role = userData.role;\n        let vendor_id = userData.vendor_id;\n        return ddb.put({\n            TableName: 'HS_user',\n            Item: {\n                'user_id': userId,\n                'name': name,\n                'role': role,\n                'vendor_id': vendor_id\n            }\n        }).promise();\n    },\n\n    /*\n     userData={\n         name : string\n     }\n     */\n    addVendor: function (vendorData) {\n        let vendorId = uuidv4();\n        let name = vendorData.name;\n        return ddb.put({\n            TableName: 'HS_vendor',\n            Item: {\n                'vendor_id': vendorId,\n                'name': name\n            }\n        }).promise();\n    },\n\n    getVendors: function () {\n        return ddb.scan({\n            TableName: 'HS_vendor'\n        }).promise();\n    },\n\n    getVendor: function (vendorId) {\n        return ddb.query({\n            TableName: 'HS_vendor',\n            ExpressionAttributeValues: {\n                ':vendor_id': vendorId\n            },\n            KeyConditionExpression: 'vendor_id = :vendor_id'\n        }).promise()\n    },\n\n    addPromo: function (promoData) {\n        return ddb.put({\n            TableName: 'HS_Promotions',\n            Item: {\n                'promoId': promoData.promoId,\n                'vendorId': promoData.vendorId,\n                'termsNConditions': promoData.terms,\n                'offerType': promoData.offerType,\n                'startDate': promoData.startDate,\n                'endDate': promoData.endDate,\n                'startTime': promoData.startTime,\n                'endTime': promoData.endTime,\n                'selectedDays': promoData.selectedDays,\n                'description': promoData.description,\n                'unitPrice': promoData.unitPrice,\n                'title': promoData.title,\n                'imgUrls': promoData.imgUrl,\n                'discount': promoData.discount,\n                'category': promoData.businessType,\n                'timestamp': promoData.timestamp,\n                'locationBox': promoData.locationBox,\n                'latNLong': promoData.latNLong\n            }\n        }).promise()\n\n    },\n\n    deletePromo: function (promoData) {\n        return ddb.delete({\n            TableName: 'HS_Promotions',\n            Key: {\n                'promoId': promoData.promoID,\n                'timestamp': timestamp\n            }\n        }).promise()\n    },\n\n    retrievePromos: function (date) {\n        return ddb.scan({\n            TableName: 'HS_Promotions',\n            ExpressionAttributeValues: {\n                ':date': date\n            },\n            FilterExpression: 'startDate <= :date and endDate >= :date'\n        }).promise()\n    },\n\n    getVendor: function (vendorId) {\n        return ddb.get({\n            TableName: 'HS_vendor',\n            Key: {\n                'vendor_id': vendorId\n            }\n        }).promise()\n    },\n\n    updatePromo: function (updatedData) {\n        return ddb.update({\n            TableName: 'HS_Promotions',\n            Key: {\n                'promoId': updatedData.promoId,\n                'timestamp': updatedData.timestamp\n            },\n            ExpressionAttributeNames: {\n                '#promoId': 'promoId',\n                '#category': 'category',\n                '#description': 'description',\n                '#discount': 'discount',\n                '#endDate': 'endDate',\n                '#endTime': 'endTime',\n                '#imgUrls': 'imgUrls',\n                '#latNLong': 'latNLong',\n                '#locationBox': 'locationBox',\n                '#offerType': 'offerType',\n                '#selectedDays': 'selectedDays',\n                '#startDate': 'startDate',\n                '#startTime': 'startTime'\n            },\n            ExpressionAttributeValues: {\n                ':promoId': updatedData.promoId,\n                ':category': updatedData.businessType,\n                ':description': updatedData.description,\n                ':discount': updatedData.discount,\n                ':endDate': updatedData.endDate,\n                ':endTime': updatedData.endTime,\n                ':imgUrls': updatedData.imgUrl,\n                ':latNLong': updatedData.latNLong,\n                ':locationBox': updatedData.locationBox,\n                ':offerType': updatedData.offerType,\n                ':selectedDays': updatedData.selectedDays,\n                ':startDate': updatedData.startDate,\n                ':startTime': updatedData.startTime\n            },\n            UpdateExpression: 'set #category = :category , #description = :category , #discount = :discount , #endDate = :endDate , #endTime = :promoId , #imgUrls = :imgUrls , #latNLong = :latNLong , #locationBox = :locationBox , #offerType = :offerType , #selectedDays = :selectedDays , #startDate = :startDate , #startTime = :startTime',\n            ConditionExpression: '#promoId = :promoId'\n        }).promise()\n    }\n}",
+        "triggers": []
       }
     },
-    "deletedFiles": [],
+    "deletedFiles": [
+      "HotSpaces-Vendor/addPromo.js",
+      "HotSpaces-Vendor/deletePromo.js",
+      "HotSpaces-Vendor/getPromo.js",
+      "HotSpaces-Vendor/updatePromo.js",
+      "HotSpaces-Vendor/getPromotions.js",
+      "HotSpaces-Vendor/addPromotions.js",
+      "HotSpaces-Vendor/deletePromotions.js"
+    ],
     "rootNode": "93ffce99-7f73-47ff-958a-0d6e790962d6",
     "openFiles": [
       "98bc0377-64db-471d-a7bf-74451db9bf90",
@@ -164,16 +185,17 @@
       "0136c15c-311e-415a-ad68-78090bf12541",
       "fee713c1-57ce-4563-8763-b5987d956e02",
       "9b90313d-8c54-42b1-9115-3b8a7826b663",
-      "dac9deff-34fa-46f9-81b9-d82feaf60240"
+      "dac9deff-34fa-46f9-81b9-d82feaf60240",
+      "4ed6d4c5-d54d-482b-b03a-2232e44d86aa"
     ],
-    "currentFileId": "dac9deff-34fa-46f9-81b9-d82feaf60240",
+    "currentFileId": "9b90313d-8c54-42b1-9115-3b8a7826b663",
     "resources": {
       "ddbHSPromotions": {
         "name": "ddbHSPromotions",
         "type": "DynamoDB",
         "config": {
           "mode": 1,
-          "operation": "query",
+          "operation": "scan",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_Promotions",
             "name": "HS_Promotions",
@@ -182,16 +204,14 @@
             "hasSortKey": true,
             "sortKey": "timestamp",
             "sortKeyType": "N",
-            "mode": 1
+            "mode": 0
           },
           "parameters": {
             "TableName": "HS_Promotions",
             "ExpressionAttributeValues": {
-              ":promo": "@{event.queryStringParameters.promo}",
-              ":vendor": "@{event.queryStringParameters.vendor}"
+              ":date": "@{date}"
             },
-            "KeyConditionExpression": "promoId :promoId",
-            "FilterExpression": "vendorId :vendorId"
+            "FilterExpression": "startDate <= :date and endDate >= :date"
           },
           "validator": {
             "validatableFields": {},
@@ -236,6 +256,69 @@
           "valid": true
         },
         "globallyEditable": false
+      },
+      "ddbHSuser": {
+        "name": "ddbHSuser",
+        "type": "DynamoDB",
+        "config": {
+          "mode": 0,
+          "operation": "put",
+          "table": {
+            "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_user",
+            "name": "HS_user",
+            "partitionKey": "user_id",
+            "partitionKeyType": "S",
+            "hasSortKey": false,
+            "sortKey": "",
+            "sortKeyType": "S",
+            "mode": 0
+          },
+          "parameters": {
+            "TableName": "HS_user",
+            "Item": {
+              "user_id": "@{userId}",
+              "name": "@{name}",
+              "role": "@{role}",
+              "vendor_id": "@{vendor_id}"
+            }
+          },
+          "validator": {
+            "validatableFields": {},
+            "validity": true
+          },
+          "valid": true
+        },
+        "globallyEditable": false
+      },
+      "ddbHSvendor": {
+        "name": "ddbHSvendor",
+        "type": "DynamoDB",
+        "config": {
+          "mode": 0,
+          "operation": "get",
+          "table": {
+            "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_vendor",
+            "name": "HS_vendor",
+            "partitionKey": "vendor_id",
+            "partitionKeyType": "S",
+            "hasSortKey": false,
+            "sortKey": "",
+            "sortKeyType": "S",
+            "mode": 0
+          },
+          "parameters": {
+            "TableName": "HS_vendor",
+            "Key": {
+              "vendor_id": "@{vendorId}"
+            }
+          },
+          "validator": {
+            "validatableFields": {},
+            "validity": true
+          },
+          "valid": true
+        },
+        "globallyEditable": false
       }
     },
     "envVariables": [
@@ -249,7 +332,12 @@
       }
     ],
     "packageJSON": {
-      "dependencies": {}
+      "dependencies": {
+        "uuid": {
+          "name": "uuid",
+          "version": "3.3.2"
+        }
+      }
     },
     "lambdaId": "98bc0377-64db-471d-a7bf-74451db9bf90"
   },
@@ -260,7 +348,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1543488115980
+    "lastSave": 1543490083933
   },
   "VCS_STATE": {
     "provider": "GitHub",
