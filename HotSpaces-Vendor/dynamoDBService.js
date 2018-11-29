@@ -5,7 +5,7 @@ module.exports = {
 
     getUser: function (userId) {
         return ddb.query({
-            TableName: 'HS_user',
+            TableName: 'HS_User',
             ExpressionAttributeValues: {
                 ':user_id': userId
             },
@@ -27,7 +27,7 @@ module.exports = {
         let role = userData.role;
         let vendor_id = userData.vendor_id;
         return ddb.put({
-            TableName: 'HS_user',
+            TableName: 'HS_User',
             Item: {
                 'user_id': userId,
                 'name': name,
@@ -46,7 +46,7 @@ module.exports = {
         let vendorId = uuidv4();
         let name = vendorData.name;
         return ddb.put({
-            TableName: 'HS_vendor',
+            TableName: 'HS_Vendor',
             Item: {
                 'vendor_id': vendorId,
                 'name': name
@@ -56,13 +56,13 @@ module.exports = {
 
     getVendors: function () {
         return ddb.scan({
-            TableName: 'HS_vendor'
+            TableName: 'HS_Vendor'
         }).promise();
     },
 
     getVendor: function (vendorId) {
         return ddb.query({
-            TableName: 'HS_vendor',
+            TableName: 'HS_Vendor',
             ExpressionAttributeValues: {
                 ':vendor_id': vendorId
             },
