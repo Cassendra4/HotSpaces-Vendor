@@ -10,7 +10,11 @@
         "children": [
           "98bc0377-64db-471d-a7bf-74451db9bf90",
           "434a5a29-a383-4df0-bed5-0abfa85d17d4",
-          "e3525801-37ee-4812-b654-b95f419c079e"
+          "e3525801-37ee-4812-b654-b95f419c079e",
+          "0136c15c-311e-415a-ad68-78090bf12541",
+          "fee713c1-57ce-4563-8763-b5987d956e02",
+          "9b90313d-8c54-42b1-9115-3b8a7826b663",
+          "dac9deff-34fa-46f9-81b9-d82feaf60240"
         ],
         "isRemovable": false,
         "filePath": "HotSpaces-Vendor"
@@ -30,6 +34,14 @@
           "runtime": "nodejs8.10",
           "timeout": 60,
           "memory": 128
+        },
+        "testCases": {
+          "cadc76ff-8048-48e3-916e-84e2a04b67cd": {
+            "id": "cadc76ff-8048-48e3-916e-84e2a04b67cd",
+            "name": "createQr",
+            "functionId": "98bc0377-64db-471d-a7bf-74451db9bf90",
+            "event": "{\"queryStringParameters\":{\n    \"promo\": \"43c33f3a-2161-4579-8b4a-7e2ab29ea364\",\n    \"vendor\": \"d1e7f6b7-1664-4525-850a-c2d761b16a29\",\n    \"grab\": \"3457657676588\",\n    \"user\": \"cassie\"\n}\n}"
+          }
         }
       },
       "434a5a29-a383-4df0-bed5-0abfa85d17d4": {
@@ -58,6 +70,82 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/createQR.js",
+        "code": "let AWS = require('aws-sdk');\nconst ddb = new AWS.DynamoDB.DocumentClient();\n\nexports.handler = function (event, context, callback) {\n\n    console.log(\"event\", event.queryStringParameters);\n    ddb.query({\n        TableName: 'HS_Promotions',\n        ExpressionAttributeValues: {\n            ':promo': event.queryStringParameters.promo,\n            ':vendor': event.queryStringParameters.vendor\n        },\n        KeyConditionExpression: 'promoId = :promo',\n        FilterExpression: 'vendorId = :vendor'\n    }).promise().then(function (data) {\n        console.log('data', data.Items);\n        let qr = {\n            \"promo\": event.queryStringParameters.promo,\n            \"vendor\": event.queryStringParameters.vendor,\n            \"type\": data.Item.category,\n            \"user\": event.queryStringParameters.user,\n            \"grabTime\": event.queryStringParameters.grab\n        };\n\n        let dt = new Date().getTime();\n        var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {\n            var r = (dt + Math.random() * 16) % 16 | 0;\n            dt = Math.floor(dt / 16);\n            return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);\n        });\n        var uuid = qr.type + uuid;\n        console.log('loggg', uuid);\n        ddb.put({\n            TableName: 'HS_QR',\n            Item: { 'vendorId': qr.vendor, 'promoId': qr.promo, 'QRId': uuid, 'category': qr.type, 'user': qr.user, 'grabTime': qr.grabTime }\n        }).promise().then(function (data) {\n            let response = {\n                \"statusCode\": 200,\n                \"headers\": {\n                    \"my_header\": \"my_value\"\n                },\n                \"body\": JSON.stringify(uuid),\n                \"isBase64Encoded\": false\n            };\n            callback(null, response);\n        }).catch(function (err) {\n            let response = {\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"my_header\": \"my_value\"\n                },\n                \"body\": err,\n                \"isBase64Encoded\": false\n            };\n            callback(null, response);\n        });\n\n\n    }).catch(function (err) {\n        let response = {\n            \"statusCode\": 502,\n            \"headers\": {\n                \"my_header\": \"my_value\"\n            },\n            \"body\": err,\n            \"isBase64Encoded\": false\n        };\n        callback(null, response);\n    });\n}",
+        "triggers": [],
+        "config": {
+          "runtime": "nodejs8.10",
+          "timeout": 60,
+          "memory": 128
+        },
+        "testCases": {
+          "920f74c6-4fd9-4e71-86ca-981daf7cfa16": {
+            "id": "920f74c6-4fd9-4e71-86ca-981daf7cfa16",
+            "name": "createQR",
+            "functionId": "e3525801-37ee-4812-b654-b95f419c079e",
+            "event": "{\"queryStringParameters\":{\n    \"promo\": \"43c33f3a-2161-4579-8b4a-7e2ab29ea364\",\n    \"vendor\": \"d1e7f6b7-1664-4525-850a-c2d761b16a29\",\n    \"grab\": \"3457657676588\",\n    \"user\": \"cassie\"\n}\n}"
+          }
+        }
+      },
+      "0136c15c-311e-415a-ad68-78090bf12541": {
+        "id": "0136c15c-311e-415a-ad68-78090bf12541",
+        "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
+        "name": "addPromo.js",
+        "type": "LAMBDA_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "HotSpaces-Vendor/addPromo.js",
+        "code": "exports.handler = function(event, context, callback) {\n    \n    callback(null, {\"message\": \"Successfully executed\"});\n}",
+        "triggers": [],
+        "config": {
+          "runtime": "nodejs8.10",
+          "timeout": 60,
+          "memory": 128
+        }
+      },
+      "fee713c1-57ce-4563-8763-b5987d956e02": {
+        "id": "fee713c1-57ce-4563-8763-b5987d956e02",
+        "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
+        "name": "getPromo.js",
+        "type": "LAMBDA_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "HotSpaces-Vendor/getPromo.js",
+        "code": "exports.handler = function(event, context, callback) {\n    \n    callback(null, {\"message\": \"Successfully executed\"});\n}",
+        "triggers": [],
+        "config": {
+          "runtime": "nodejs8.10",
+          "timeout": 60,
+          "memory": 128
+        }
+      },
+      "9b90313d-8c54-42b1-9115-3b8a7826b663": {
+        "id": "9b90313d-8c54-42b1-9115-3b8a7826b663",
+        "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
+        "name": "deletePromo.js",
+        "type": "LAMBDA_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "HotSpaces-Vendor/deletePromo.js",
+        "code": "exports.handler = function(event, context, callback) {\n    \n    callback(null, {\"message\": \"Successfully executed\"});\n}",
+        "triggers": [],
+        "config": {
+          "runtime": "nodejs8.10",
+          "timeout": 60,
+          "memory": 128
+        }
+      },
+      "dac9deff-34fa-46f9-81b9-d82feaf60240": {
+        "id": "dac9deff-34fa-46f9-81b9-d82feaf60240",
+        "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
+        "name": "updatePromo.js",
+        "type": "LAMBDA_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "HotSpaces-Vendor/updatePromo.js",
         "code": "exports.handler = function(event, context, callback) {\n    \n    callback(null, {\"message\": \"Successfully executed\"});\n}",
         "triggers": [],
         "config": {
@@ -67,17 +155,89 @@
         }
       }
     },
-    "deletedFiles": [
-      "HotSpaces-Vendor/lambda.js"
-    ],
+    "deletedFiles": [],
     "rootNode": "93ffce99-7f73-47ff-958a-0d6e790962d6",
     "openFiles": [
       "98bc0377-64db-471d-a7bf-74451db9bf90",
       "434a5a29-a383-4df0-bed5-0abfa85d17d4",
-      "e3525801-37ee-4812-b654-b95f419c079e"
+      "e3525801-37ee-4812-b654-b95f419c079e",
+      "0136c15c-311e-415a-ad68-78090bf12541",
+      "fee713c1-57ce-4563-8763-b5987d956e02",
+      "9b90313d-8c54-42b1-9115-3b8a7826b663",
+      "dac9deff-34fa-46f9-81b9-d82feaf60240"
     ],
-    "currentFileId": "434a5a29-a383-4df0-bed5-0abfa85d17d4",
-    "resources": {},
+    "currentFileId": "dac9deff-34fa-46f9-81b9-d82feaf60240",
+    "resources": {
+      "ddbHSPromotions": {
+        "name": "ddbHSPromotions",
+        "type": "DynamoDB",
+        "config": {
+          "mode": 1,
+          "operation": "query",
+          "table": {
+            "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_Promotions",
+            "name": "HS_Promotions",
+            "partitionKey": "promoId",
+            "partitionKeyType": "S",
+            "hasSortKey": true,
+            "sortKey": "timestamp",
+            "sortKeyType": "N",
+            "mode": 1
+          },
+          "parameters": {
+            "TableName": "HS_Promotions",
+            "ExpressionAttributeValues": {
+              ":promo": "@{event.queryStringParameters.promo}",
+              ":vendor": "@{event.queryStringParameters.vendor}"
+            },
+            "KeyConditionExpression": "promoId :promoId",
+            "FilterExpression": "vendorId :vendorId"
+          },
+          "validator": {
+            "validatableFields": {},
+            "validity": true
+          },
+          "valid": true
+        },
+        "globallyEditable": false
+      },
+      "ddbHSQR": {
+        "name": "ddbHSQR",
+        "type": "DynamoDB",
+        "config": {
+          "mode": 1,
+          "operation": "put",
+          "table": {
+            "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_QR",
+            "name": "HS_QR",
+            "partitionKey": "QRId",
+            "partitionKeyType": "S",
+            "hasSortKey": false,
+            "sortKey": "",
+            "sortKeyType": "S",
+            "mode": 0
+          },
+          "parameters": {
+            "Key": {},
+            "Item": {
+              "vendorId": "hello",
+              "promoId": "hello",
+              "QRId": "heel",
+              "category": 1,
+              "user": "cassie",
+              "grabTime": 24355768900
+            },
+            "ExpressionAttributeValues": {}
+          },
+          "validator": {
+            "validatableFields": {},
+            "validity": true
+          },
+          "valid": true
+        },
+        "globallyEditable": false
+      }
+    },
     "envVariables": [
       {
         "lambdaId": "all",
@@ -100,7 +260,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1543485360349
+    "lastSave": 1543488115980
   },
   "VCS_STATE": {
     "provider": "GitHub",
