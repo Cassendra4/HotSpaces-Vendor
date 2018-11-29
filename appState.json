@@ -17,7 +17,11 @@
           "dac9deff-34fa-46f9-81b9-d82feaf60240",
           "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
           "1f94f853-5bdb-41ea-afe7-231da7fae32f",
-          "0ea56e39-0305-4693-9692-86a3206d9a26"
+          "0ea56e39-0305-4693-9692-86a3206d9a26",
+          "199ba057-a0f1-48a2-aa34-959f29047ff0",
+          "507d5999-d6df-45a1-a809-fd4943d3954b",
+          "a7f41488-5b3a-43b0-99fe-c0e3dd313f01",
+          "8b217d09-dd2c-4080-8822-152637ae20c2"
         ],
         "isRemovable": false,
         "filePath": "HotSpaces-Vendor"
@@ -197,14 +201,81 @@
         "filePath": "HotSpaces-Vendor/authService.js",
         "code": "let axios = require('axios');\n\nmodule.exports = {\n    \n    validateUser: function (userUUID, userName, callback) {\n        let headers = {};\n        headers['Authorization'] = 'hotspacesAdmin2018#';\n        axios.get('https://us-central1-hotspa-beta.cloudfunctions.net/user/' + userUUID, { headers: headers }).then((response) => {\n            if (response.data[\"username\"] == userName) {\n                callback({ validated: true, error: null });\n            } else {\n                callback({ validated: false, error: null });\n            }\n        }).catch((err) => {\n            console.log(err);\n            callback({ validated: false, error: err });\n        });\n    },\n}",
         "triggers": []
+      },
+      "199ba057-a0f1-48a2-aa34-959f29047ff0": {
+        "id": "199ba057-a0f1-48a2-aa34-959f29047ff0",
+        "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
+        "name": "utils.js",
+        "type": "JS_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "HotSpaces-Vendor/utils.js",
+        "code": "module.exports = {\n    authorize: function (event, callback) {\n        if (!event.headers || !event.headers[\"Authorization\"] || event.headers[\"Authorization\"] !== 'hotspaces2018#') {\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 403,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": 'Authorization failed'\n            });\n        } else {\n            return true;\n        }\n    }\n}",
+        "triggers": []
+      },
+      "507d5999-d6df-45a1-a809-fd4943d3954b": {
+        "id": "507d5999-d6df-45a1-a809-fd4943d3954b",
+        "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
+        "name": "getUser.js",
+        "type": "LAMBDA_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "HotSpaces-Vendor/getUser.js",
+        "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\nlet utils = require('./utils');\n\nexports.handler = function(event, context, callback) {\n    let userId = event[\"queryStringParameters\"]['userid'];\n\n    if (utils.authorize(event, callback) && userId) {\n       \n        dynamoDBService.getUser(userId).then(data => {\n            let items = data.Items;\n\n            if (items.length > 0) {\n                callback(null, {\n                    \"isBase64Encoded\": true,\n                    \"statusCode\": 200,\n                    \"headers\": {\n                        \"Access-Control-Allow-Origin\": \"*\",\n                        \"Access-Control-Allow-Methods\": \"*\"\n                    },\n                    \"body\": JSON.stringify(items[0])\n                });\n            } else {\n                callback(null, {\n                    \"isBase64Encoded\": true,\n                    \"statusCode\": 502,\n                    \"headers\": {\n                        \"Access-Control-Allow-Origin\": \"*\",\n                        \"Access-Control-Allow-Methods\": \"*\"\n                    },\n                    \"body\": 'No user with the provided user id'\n                });\n            }\n\n        }).catch(error => {\n            console.log(error);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": 'Faild to retreive the user for id : ' + userId\n            });\n        })\n    } else {\n        callback(null, {\n            \"isBase64Encoded\": true,\n            \"statusCode\": 502,\n            \"headers\": {\n                \"Access-Control-Allow-Origin\": \"*\",\n                \"Access-Control-Allow-Methods\": \"*\"\n            },\n            \"body\": 'User id is missing in query params.'\n        });\n    }\n}",
+        "triggers": [],
+        "config": {
+          "runtime": "nodejs8.10",
+          "timeout": 60,
+          "memory": 128
+        }
+      },
+      "a7f41488-5b3a-43b0-99fe-c0e3dd313f01": {
+        "id": "a7f41488-5b3a-43b0-99fe-c0e3dd313f01",
+        "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
+        "name": "addUser.js",
+        "type": "LAMBDA_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "HotSpaces-Vendor/addUser.js",
+        "code": "let AWS = require('aws-sdk');\nconst cognito_idp = new AWS.CognitoIdentityServiceProvider();\nlet dynamoDBService = require('./dynamoDBService');\nlet utils = require('./utils');\n\nexports.handler = function(event, context, callback) {\n    \n    if (utils.authorize(event, callback)) {\n\n        let body = JSON.parse(event.body);\n        let name = body.name;\n        let email = body.email;\n        let phone_number = body.phone_number;\n        let temp_password = body.temp_password;\n        let role = body.role;\n        let vendorId = body.vendor_id;\n\n        cognito_idp.adminCreateUser({\n            UserPoolId: \"us-east-1_mcdTV1jKi\",\n            Username: `${email}`,\n            DesiredDeliveryMediums: [\"EMAIL\", \"SMS\"],\n            ForceAliasCreation: false,\n            TemporaryPassword: `${temp_password}`,\n            UserAttributes: [{\n                Name: \"name\",\n                Value: `${name}`\n            }, {\n                Name: \"email\",\n                Value: `${email}`\n            }, {\n                Name: \"phone_number\",\n                Value: `${phone_number}`\n            }],\n            ValidationData: []\n        }, function (error, data) {\n            if (error) {\n                console.log(error);\n                callback(null, {\n                    \"isBase64Encoded\": true,\n                    \"statusCode\": 502,\n                    \"headers\": {\n                        \"Access-Control-Allow-Origin\": \"*\",\n                        \"Access-Control-Allow-Methods\": \"*\"\n                    },\n                    \"body\": error.message\n                });\n            } else {\n                console.log(data);\n                dynamoDBService.addUser({\n                    uid: data.User.Username,\n                    name: name,\n                    role: role,\n                    vendor_id: vendorId\n                }).then(function () {\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 200,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": 'Successfully added vendor with name : ' + name\n                    });\n                }).catch(function (error) {\n                    console.log(error);\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 502,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": 'User added to cognito pool but failed to add to dynamo DB. ' + error.message\n                    });\n                });\n\n            }\n        });\n    }\n}",
+        "triggers": [],
+        "config": {
+          "runtime": "nodejs8.10",
+          "timeout": 60,
+          "memory": 128
+        }
+      },
+      "8b217d09-dd2c-4080-8822-152637ae20c2": {
+        "id": "8b217d09-dd2c-4080-8822-152637ae20c2",
+        "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
+        "name": "addVendor.js",
+        "type": "LAMBDA_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "HotSpaces-Vendor/addVendor.js",
+        "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\nlet utils = require('./utils');\n\nexports.handler = function(event, context, callback) {\n    if (utils.authorize(event, callback)) {\n        \n        let body = JSON.parse(event.body);\n        let vendorName = body.name;\n        let vendor = {\n            name: vendorName\n        }\n        dynamoDBService.addVendor(vendor).then(function (data) {\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 200,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": 'Successfully added vendor with name : ' + vendorName\n            });\n        }).catch(function (err) {\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": err.message\n            });\n        });\n    }\n}",
+        "triggers": [],
+        "config": {
+          "runtime": "nodejs8.10",
+          "timeout": 60,
+          "memory": 128
+        }
       }
     },
     "deletedFiles": [],
     "rootNode": "93ffce99-7f73-47ff-958a-0d6e790962d6",
     "openFiles": [
-      "0ea56e39-0305-4693-9692-86a3206d9a26"
+      "0ea56e39-0305-4693-9692-86a3206d9a26",
+      "199ba057-a0f1-48a2-aa34-959f29047ff0",
+      "507d5999-d6df-45a1-a809-fd4943d3954b",
+      "a7f41488-5b3a-43b0-99fe-c0e3dd313f01",
+      "8b217d09-dd2c-4080-8822-152637ae20c2"
     ],
-    "currentFileId": "0ea56e39-0305-4693-9692-86a3206d9a26",
+    "currentFileId": "8b217d09-dd2c-4080-8822-152637ae20c2",
     "resources": {
       "ddbHSPromotions": {
         "name": "ddbHSPromotions",
@@ -369,7 +440,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1543495214766
+    "lastSave": 1543495895115
   },
   "VCS_STATE": {
     "provider": "GitHub",
