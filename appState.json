@@ -1,0 +1,112 @@
+{
+  "EDITOR_STATE": {
+    "allProjectFiles": {
+      "93ffce99-7f73-47ff-958a-0d6e790962d6": {
+        "id": "93ffce99-7f73-47ff-958a-0d6e790962d6",
+        "parent": null,
+        "name": "HotSpaces-Vendor",
+        "type": "DIRECTORY",
+        "isDirectory": true,
+        "children": [
+          "98bc0377-64db-471d-a7bf-74451db9bf90",
+          "434a5a29-a383-4df0-bed5-0abfa85d17d4",
+          "e3525801-37ee-4812-b654-b95f419c079e"
+        ],
+        "isRemovable": false,
+        "filePath": "HotSpaces-Vendor"
+      },
+      "98bc0377-64db-471d-a7bf-74451db9bf90": {
+        "id": "98bc0377-64db-471d-a7bf-74451db9bf90",
+        "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
+        "name": "readQR.js",
+        "type": "LAMBDA_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "HotSpaces-Vendor/readQR.js",
+        "code": "exports.handler = function(event, context, callback) {\n    \n    callback(null, {\"message\": \"Successfully executed\"});\n}",
+        "triggers": [],
+        "config": {
+          "runtime": "nodejs8.10",
+          "timeout": 60,
+          "memory": 128
+        }
+      },
+      "434a5a29-a383-4df0-bed5-0abfa85d17d4": {
+        "id": "434a5a29-a383-4df0-bed5-0abfa85d17d4",
+        "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
+        "name": "redeemOffer.js",
+        "type": "LAMBDA_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "HotSpaces-Vendor/redeemOffer.js",
+        "code": "exports.handler = function(event, context, callback) {\n    \n    callback(null, {\"message\": \"Successfully executed\"});\n}",
+        "triggers": [],
+        "config": {
+          "runtime": "nodejs8.10",
+          "timeout": 60,
+          "memory": 128
+        }
+      },
+      "e3525801-37ee-4812-b654-b95f419c079e": {
+        "id": "e3525801-37ee-4812-b654-b95f419c079e",
+        "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
+        "name": "createQR.js",
+        "type": "LAMBDA_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "HotSpaces-Vendor/createQR.js",
+        "code": "exports.handler = function(event, context, callback) {\n    \n    callback(null, {\"message\": \"Successfully executed\"});\n}",
+        "triggers": [],
+        "config": {
+          "runtime": "nodejs8.10",
+          "timeout": 60,
+          "memory": 128
+        }
+      }
+    },
+    "deletedFiles": [
+      "HotSpaces-Vendor/lambda.js"
+    ],
+    "rootNode": "93ffce99-7f73-47ff-958a-0d6e790962d6",
+    "openFiles": [
+      "98bc0377-64db-471d-a7bf-74451db9bf90",
+      "434a5a29-a383-4df0-bed5-0abfa85d17d4",
+      "e3525801-37ee-4812-b654-b95f419c079e"
+    ],
+    "currentFileId": "434a5a29-a383-4df0-bed5-0abfa85d17d4",
+    "resources": {},
+    "envVariables": [
+      {
+        "lambdaId": "all",
+        "varKey": "SIGMA_AWS_ACC_ID",
+        "varValue": null,
+        "shouldPersist": false,
+        "displayOnly": false,
+        "editable": false
+      }
+    ],
+    "packageJSON": {
+      "dependencies": {}
+    },
+    "lambdaId": "98bc0377-64db-471d-a7bf-74451db9bf90"
+  },
+  "PROJECT_META": {
+    "projectName": "HotSpaces-Vendor",
+    "projectDescription": "Backend implementation for HotSpaces Vendor app",
+    "projectVersion": "1.0.0",
+    "projectRegion": "us-east-1",
+    "platform": "AWS",
+    "platformRegions": {},
+    "lastSave": 1543485360349
+  },
+  "VCS_STATE": {
+    "provider": "GitHub",
+    "repo": {
+      "name": "HotSpaces-Vendor",
+      "url": "https://github.com/Cassendra4/HotSpaces-Vendor"
+    }
+  }
+}
