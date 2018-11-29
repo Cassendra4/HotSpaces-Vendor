@@ -16,7 +16,8 @@
           "9b90313d-8c54-42b1-9115-3b8a7826b663",
           "dac9deff-34fa-46f9-81b9-d82feaf60240",
           "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
-          "1f94f853-5bdb-41ea-afe7-231da7fae32f"
+          "1f94f853-5bdb-41ea-afe7-231da7fae32f",
+          "0ea56e39-0305-4693-9692-86a3206d9a26"
         ],
         "isRemovable": false,
         "filePath": "HotSpaces-Vendor"
@@ -184,15 +185,26 @@
           "timeout": 60,
           "memory": 128
         }
+      },
+      "0ea56e39-0305-4693-9692-86a3206d9a26": {
+        "id": "0ea56e39-0305-4693-9692-86a3206d9a26",
+        "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
+        "name": "authService.js",
+        "type": "JS_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "HotSpaces-Vendor/authService.js",
+        "code": "let axios = require('axios');\n\nmodule.exports = {\n    \n    validateUser: function (userUUID, userName, callback) {\n        let headers = {};\n        headers['Authorization'] = 'hotspacesAdmin2018#';\n        axios.get('https://us-central1-hotspa-beta.cloudfunctions.net/user/' + userUUID, { headers: headers }).then((response) => {\n            if (response.data[\"username\"] == userName) {\n                callback({ validated: true, error: null });\n            } else {\n                callback({ validated: false, error: null });\n            }\n        }).catch((err) => {\n            console.log(err);\n            callback({ validated: false, error: err });\n        });\n    },\n}",
+        "triggers": []
       }
     },
     "deletedFiles": [],
     "rootNode": "93ffce99-7f73-47ff-958a-0d6e790962d6",
     "openFiles": [
-      "1f94f853-5bdb-41ea-afe7-231da7fae32f",
-      "9b90313d-8c54-42b1-9115-3b8a7826b663"
+      "0ea56e39-0305-4693-9692-86a3206d9a26"
     ],
-    "currentFileId": "1f94f853-5bdb-41ea-afe7-231da7fae32f",
+    "currentFileId": "0ea56e39-0305-4693-9692-86a3206d9a26",
     "resources": {
       "ddbHSPromotions": {
         "name": "ddbHSPromotions",
@@ -357,7 +369,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1543494979730
+    "lastSave": 1543495214766
   },
   "VCS_STATE": {
     "provider": "GitHub",
