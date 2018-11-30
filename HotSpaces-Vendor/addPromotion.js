@@ -5,8 +5,8 @@ const uuidv4 = require('uuid/v4');
 exports.handler = function(event, context, callback) {
     let timestamp = Math.round((new Date()).getTime() / 1000);
     // console.log(timestamp);
-    let body = JSON.parse(event.body);
-    console.log(body)
+    console.log(event);
+    let body = event.body;
     let promoData = {
         promoId : uuidv4(),
         vendorId : body.vendorId,

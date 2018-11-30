@@ -118,6 +118,16 @@ module.exports = {
         }).promise()
     },
 
+    getPromo: function (vendor) {
+        return ddb.scan({
+            TableName: 'HS_Promotions',
+            ExpressionAttributeValues: {
+                ':vendor': vendor
+            },
+            FilterExpression: 'vendorId = :vendor'
+        }).promise();
+    },
+
     updatePromo: function (updatedData) {
         return ddb.update({
             TableName: 'HS_Promotions',
