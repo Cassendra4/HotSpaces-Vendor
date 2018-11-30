@@ -21,7 +21,8 @@
           "199ba057-a0f1-48a2-aa34-959f29047ff0",
           "507d5999-d6df-45a1-a809-fd4943d3954b",
           "a7f41488-5b3a-43b0-99fe-c0e3dd313f01",
-          "8b217d09-dd2c-4080-8822-152637ae20c2"
+          "8b217d09-dd2c-4080-8822-152637ae20c2",
+          "3fd97c9a-d36d-45cf-bb8d-005324d0a31c"
         ],
         "isRemovable": false,
         "filePath": "HotSpaces-Vendor"
@@ -280,6 +281,23 @@
           "timeout": 60,
           "memory": 128
         }
+      },
+      "3fd97c9a-d36d-45cf-bb8d-005324d0a31c": {
+        "id": "3fd97c9a-d36d-45cf-bb8d-005324d0a31c",
+        "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
+        "name": "getVendors.js",
+        "type": "LAMBDA_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "HotSpaces-Vendor/getVendors.js",
+        "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\nlet utils = require('./utils');\n\nexports.handler = function(event, context, callback) {\n    \n    if (utils.authorize(event, callback)) {\n        dynamoDBService.getVendors().then(function (data) {\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 200,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": JSON.stringify(data.Items)\n            });\n        }).catch(err => {\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": err.message\n            })\n        });\n    }\n}",
+        "triggers": [],
+        "config": {
+          "runtime": "nodejs8.10",
+          "timeout": 60,
+          "memory": 128
+        }
       }
     },
     "deletedFiles": [],
@@ -293,9 +311,10 @@
       "434a5a29-a383-4df0-bed5-0abfa85d17d4",
       "e3525801-37ee-4812-b654-b95f419c079e",
       "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
-      "1f94f853-5bdb-41ea-afe7-231da7fae32f"
+      "1f94f853-5bdb-41ea-afe7-231da7fae32f",
+      "3fd97c9a-d36d-45cf-bb8d-005324d0a31c"
     ],
-    "currentFileId": "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
+    "currentFileId": "3fd97c9a-d36d-45cf-bb8d-005324d0a31c",
     "resources": {
       "ddbHSPromotions": {
         "name": "ddbHSPromotions",
@@ -516,7 +535,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1543568612672
+    "lastSave": 1543568781202
   },
   "VCS_STATE": {
     "provider": "GitHub",
