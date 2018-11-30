@@ -1,18 +1,15 @@
 let AWS = require('aws-sdk');
 const ddb = new AWS.DynamoDB.DocumentClient();
+let dynamoDBService = require('./dynamoDBService');
 
 exports.handler = function (event, context, callback) {
 
     console.log("event", event.queryStringParameters);
-    ddb.query({
-        TableName: 'HS_Promotions',
-        ExpressionAttributeValues: {
-            ':promo': event.queryStringParameters.promo,
-            ':vendor': event.queryStringParameters.vendor
-        },
-        KeyConditionExpression: 'promoId = :promo',
-        FilterExpression: 'vendorId = :vendor'
-    }).promise().then(function (data) {
+    let promo = {
+        promo: event.queryStringParameters.promo,
+        vendor: event.queryStringParameters.vendor
+    };
+    dynamoDBService.createQR(promo).then(function (data) {
         console.log('data', data.Items);
         let qr = {
             "promo": event.queryStringParameters.promo,
@@ -30,10 +27,7 @@ exports.handler = function (event, context, callback) {
         });
         var uuid = qr.type + uuid;
         console.log('loggg', uuid);
-        ddb.put({
-            TableName: 'HS_QR',
-            Item: { 'vendorId': qr.vendor, 'promoId': qr.promo, 'QRId': uuid, 'category': qr.type, 'user': qr.user, 'grabTime': qr.grabTime }
-        }).promise().then(function (data) {
+        dynamoDBService.addToQR(qr, uuid).then(function (data) {
             let response = {
                 "statusCode": 200,
                 "headers": {

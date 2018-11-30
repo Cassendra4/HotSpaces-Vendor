@@ -77,7 +77,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/createQR.js",
-        "code": "let AWS = require('aws-sdk');\nconst ddb = new AWS.DynamoDB.DocumentClient();\n\nexports.handler = function (event, context, callback) {\n\n    console.log(\"event\", event.queryStringParameters);\n    ddb.query({\n        TableName: 'HS_Promotions',\n        ExpressionAttributeValues: {\n            ':promo': event.queryStringParameters.promo,\n            ':vendor': event.queryStringParameters.vendor\n        },\n        KeyConditionExpression: 'promoId = :promo',\n        FilterExpression: 'vendorId = :vendor'\n    }).promise().then(function (data) {\n        console.log('data', data.Items);\n        let qr = {\n            \"promo\": event.queryStringParameters.promo,\n            \"vendor\": event.queryStringParameters.vendor,\n            \"type\": data.Item.category,\n            \"user\": event.queryStringParameters.user,\n            \"grabTime\": event.queryStringParameters.grab\n        };\n\n        let dt = new Date().getTime();\n        var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {\n            var r = (dt + Math.random() * 16) % 16 | 0;\n            dt = Math.floor(dt / 16);\n            return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);\n        });\n        var uuid = qr.type + uuid;\n        console.log('loggg', uuid);\n        ddb.put({\n            TableName: 'HS_QR',\n            Item: { 'vendorId': qr.vendor, 'promoId': qr.promo, 'QRId': uuid, 'category': qr.type, 'user': qr.user, 'grabTime': qr.grabTime }\n        }).promise().then(function (data) {\n            let response = {\n                \"statusCode\": 200,\n                \"headers\": {\n                    \"my_header\": \"my_value\"\n                },\n                \"body\": JSON.stringify(uuid),\n                \"isBase64Encoded\": false\n            };\n            callback(null, response);\n        }).catch(function (err) {\n            let response = {\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"my_header\": \"my_value\"\n                },\n                \"body\": err,\n                \"isBase64Encoded\": false\n            };\n            callback(null, response);\n        });\n\n\n    }).catch(function (err) {\n        let response = {\n            \"statusCode\": 502,\n            \"headers\": {\n                \"my_header\": \"my_value\"\n            },\n            \"body\": err,\n            \"isBase64Encoded\": false\n        };\n        callback(null, response);\n    });\n}",
+        "code": "let AWS = require('aws-sdk');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet dynamoDBService = require('./dynamoDBService');\n\nexports.handler = function (event, context, callback) {\n\n    console.log(\"event\", event.queryStringParameters);\n    let promo = {\n        promo: event.queryStringParameters.promo,\n        vendor: event.queryStringParameters.vendor\n    };\n    dynamoDBService.createQR(promo).then(function (data) {\n        console.log('data', data.Items);\n        let qr = {\n            \"promo\": event.queryStringParameters.promo,\n            \"vendor\": event.queryStringParameters.vendor,\n            \"type\": data.Item.category,\n            \"user\": event.queryStringParameters.user,\n            \"grabTime\": event.queryStringParameters.grab\n        };\n\n        let dt = new Date().getTime();\n        var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {\n            var r = (dt + Math.random() * 16) % 16 | 0;\n            dt = Math.floor(dt / 16);\n            return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);\n        });\n        var uuid = qr.type + uuid;\n        console.log('loggg', uuid);\n        dynamoDBService.addToQR(qr, uuid).then(function (data) {\n            let response = {\n                \"statusCode\": 200,\n                \"headers\": {\n                    \"my_header\": \"my_value\"\n                },\n                \"body\": JSON.stringify(uuid),\n                \"isBase64Encoded\": false\n            };\n            callback(null, response);\n        }).catch(function (err) {\n            let response = {\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"my_header\": \"my_value\"\n                },\n                \"body\": err,\n                \"isBase64Encoded\": false\n            };\n            callback(null, response);\n        });\n\n\n    }).catch(function (err) {\n        let response = {\n            \"statusCode\": 502,\n            \"headers\": {\n                \"my_header\": \"my_value\"\n            },\n            \"body\": err,\n            \"isBase64Encoded\": false\n        };\n        callback(null, response);\n    });\n}",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -170,7 +170,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/dynamoDBService.js",
-        "code": "let AWS = require('aws-sdk');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nconst uuidv4 = require('uuid/v4');\n\nmodule.exports = {\n\n    getUser: function (userId) {\n        return ddb.query({\n            TableName: 'HS_User',\n            ExpressionAttributeValues: {\n                ':user_id': userId\n            },\n            KeyConditionExpression: 'user_id = :user_id'\n        }).promise()\n\n    },\n\n    /*\n     userData={\n         name : string,\n         role : string,\n         vender_id : string\n     }\n     */\n    addUser: function (userData) {\n        let userId = userData.uid;\n        let name = userData.name;\n        let role = userData.role;\n        let vendor_id = userData.vendor_id;\n        return ddb.put({\n            TableName: 'HS_User',\n            Item: {\n                'user_id': userId,\n                'name': name,\n                'role': role,\n                'vendor_id': vendor_id\n            }\n        }).promise();\n    },\n\n    /*\n     userData={\n         name : string\n     }\n     */\n    addVendor: function (vendorData) {\n        let vendorId = uuidv4();\n        let name = vendorData.name;\n        return ddb.put({\n            TableName: 'HS_Vendor',\n            Item: {\n                'vendor_id': vendorId,\n                'name': name\n            }\n        }).promise();\n    },\n\n    getVendors: function () {\n        return ddb.scan({\n            TableName: 'HS_Vendor'\n        }).promise();\n    },\n\n    getVendor: function (vendorId) {\n        return ddb.query({\n            TableName: 'HS_Vendor',\n            ExpressionAttributeValues: {\n                ':vendor_id': vendorId\n            },\n            KeyConditionExpression: 'vendor_id = :vendor_id'\n        }).promise()\n    },\n\n    addPromo: function (promoData) {\n        return ddb.put({\n            TableName: 'HS_Promotions',\n            Item: {\n                'promoId': promoData.promoId,\n                'vendorId': promoData.vendorId,\n                'termsNConditions': promoData.terms,\n                'offerType': promoData.offerType,\n                'startDate': promoData.startDate,\n                'endDate': promoData.endDate,\n                'startTime': promoData.startTime,\n                'endTime': promoData.endTime,\n                'selectedDays': promoData.selectedDays,\n                'description': promoData.description,\n                'unitPrice': promoData.unitPrice,\n                'title': promoData.title,\n                'imgUrls': promoData.imgUrl,\n                'discount': promoData.discount,\n                'category': promoData.businessType,\n                'timestamp': promoData.timestamp,\n                'locationBox': promoData.locationBox,\n                'latNLong': promoData.latNLong\n            }\n        }).promise()\n\n    },\n\n    deletePromo: function (promoData) {\n        return ddb.delete({\n            TableName: 'HS_Promotions',\n            Key: {\n                'promoId': promoData.promoID,\n                'timestamp': timestamp\n            }\n        }).promise()\n    },\n\n    retrievePromos: function (date) {\n        return ddb.scan({\n            TableName: 'HS_Promotions',\n            ExpressionAttributeValues: {\n                ':date': date\n            },\n            FilterExpression: 'startDate <= :date and endDate >= :date'\n        }).promise()\n    },\n\n    updatePromo: function (updatedData) {\n        return ddb.update({\n            TableName: 'HS_Promotions',\n            Key: {\n                'promoId': updatedData.promoId,\n                'timestamp': updatedData.timestamp\n            },\n            ExpressionAttributeNames: {\n                '#promoId': 'promoId',\n                '#category': 'category',\n                '#description': 'description',\n                '#discount': 'discount',\n                '#endDate': 'endDate',\n                '#endTime': 'endTime',\n                '#imgUrls': 'imgUrls',\n                '#latNLong': 'latNLong',\n                '#locationBox': 'locationBox',\n                '#offerType': 'offerType',\n                '#selectedDays': 'selectedDays',\n                '#startDate': 'startDate',\n                '#startTime': 'startTime'\n            },\n            ExpressionAttributeValues: {\n                ':promoId': updatedData.promoId,\n                ':category': updatedData.businessType,\n                ':description': updatedData.description,\n                ':discount': updatedData.discount,\n                ':endDate': updatedData.endDate,\n                ':endTime': updatedData.endTime,\n                ':imgUrls': updatedData.imgUrl,\n                ':latNLong': updatedData.latNLong,\n                ':locationBox': updatedData.locationBox,\n                ':offerType': updatedData.offerType,\n                ':selectedDays': updatedData.selectedDays,\n                ':startDate': updatedData.startDate,\n                ':startTime': updatedData.startTime\n            },\n            UpdateExpression: 'set #category = :category , #description = :category , #discount = :discount , #endDate = :endDate , #endTime = :promoId , #imgUrls = :imgUrls , #latNLong = :latNLong , #locationBox = :locationBox , #offerType = :offerType , #selectedDays = :selectedDays , #startDate = :startDate , #startTime = :startTime',\n            ConditionExpression: '#promoId = :promoId'\n        }).promise()\n    }\n}",
+        "code": "let AWS = require('aws-sdk');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nconst uuidv4 = require('uuid/v4');\n\nmodule.exports = {\n\n    getUser: function (userId) {\n        return ddb.query({\n            TableName: 'HS_User',\n            ExpressionAttributeValues: {\n                ':user_id': userId\n            },\n            KeyConditionExpression: 'user_id = :user_id'\n        }).promise()\n\n    },\n\n    /*\n     userData={\n         name : string,\n         role : string,\n         vender_id : string\n     }\n     */\n    addUser: function (userData) {\n        let userId = userData.uid;\n        let name = userData.name;\n        let role = userData.role;\n        let vendor_id = userData.vendor_id;\n        return ddb.put({\n            TableName: 'HS_User',\n            Item: {\n                'user_id': userId,\n                'name': name,\n                'role': role,\n                'vendor_id': vendor_id\n            }\n        }).promise();\n    },\n\n    /*\n     userData={\n         name : string\n     }\n     */\n    addVendor: function (vendorData) {\n        let vendorId = uuidv4();\n        let name = vendorData.name;\n        return ddb.put({\n            TableName: 'HS_Vendor',\n            Item: {\n                'vendor_id': vendorId,\n                'name': name\n            }\n        }).promise();\n    },\n\n    getVendors: function () {\n        return ddb.scan({\n            TableName: 'HS_Vendor'\n        }).promise();\n    },\n\n    getVendor: function (vendorId) {\n        return ddb.query({\n            TableName: 'HS_Vendor',\n            ExpressionAttributeValues: {\n                ':vendor_id': vendorId\n            },\n            KeyConditionExpression: 'vendor_id = :vendor_id'\n        }).promise()\n    },\n\n    addPromo: function (promoData) {\n        return ddb.put({\n            TableName: 'HS_Promotions',\n            Item: {\n                'promoId': promoData.promoId,\n                'vendorId': promoData.vendorId,\n                'termsNConditions': promoData.terms,\n                'offerType': promoData.offerType,\n                'startDate': promoData.startDate,\n                'endDate': promoData.endDate,\n                'startTime': promoData.startTime,\n                'endTime': promoData.endTime,\n                'selectedDays': promoData.selectedDays,\n                'description': promoData.description,\n                'unitPrice': promoData.unitPrice,\n                'title': promoData.title,\n                'imgUrls': promoData.imgUrl,\n                'discount': promoData.discount,\n                'category': promoData.businessType,\n                'timestamp': promoData.timestamp,\n                'locationBox': promoData.locationBox,\n                'latNLong': promoData.latNLong\n            }\n        }).promise()\n\n    },\n\n    deletePromo: function (promoData) {\n        return ddb.delete({\n            TableName: 'HS_Promotions',\n            Key: {\n                'promoId': promoData.promoID,\n                'timestamp': timestamp\n            }\n        }).promise()\n    },\n\n    retrievePromos: function (date) {\n        return ddb.scan({\n            TableName: 'HS_Promotions',\n            ExpressionAttributeValues: {\n                ':date': date\n            },\n            FilterExpression: 'startDate <= :date and endDate >= :date'\n        }).promise()\n    },\n\n    updatePromo: function (updatedData) {\n        return ddb.update({\n            TableName: 'HS_Promotions',\n            Key: {\n                'promoId': updatedData.promoId,\n                'timestamp': updatedData.timestamp\n            },\n            ExpressionAttributeNames: {\n                '#promoId': 'promoId',\n                '#category': 'category',\n                '#description': 'description',\n                '#discount': 'discount',\n                '#endDate': 'endDate',\n                '#endTime': 'endTime',\n                '#imgUrls': 'imgUrls',\n                '#latNLong': 'latNLong',\n                '#locationBox': 'locationBox',\n                '#offerType': 'offerType',\n                '#selectedDays': 'selectedDays',\n                '#startDate': 'startDate',\n                '#startTime': 'startTime'\n            },\n            ExpressionAttributeValues: {\n                ':promoId': updatedData.promoId,\n                ':category': updatedData.businessType,\n                ':description': updatedData.description,\n                ':discount': updatedData.discount,\n                ':endDate': updatedData.endDate,\n                ':endTime': updatedData.endTime,\n                ':imgUrls': updatedData.imgUrl,\n                ':latNLong': updatedData.latNLong,\n                ':locationBox': updatedData.locationBox,\n                ':offerType': updatedData.offerType,\n                ':selectedDays': updatedData.selectedDays,\n                ':startDate': updatedData.startDate,\n                ':startTime': updatedData.startTime\n            },\n            UpdateExpression: 'set #category = :category , #description = :category , #discount = :discount , #endDate = :endDate , #endTime = :promoId , #imgUrls = :imgUrls , #latNLong = :latNLong , #locationBox = :locationBox , #offerType = :offerType , #selectedDays = :selectedDays , #startDate = :startDate , #startTime = :startTime',\n            ConditionExpression: '#promoId = :promoId'\n        }).promise()\n    },\n\n    createQR: function (data) {\n        return ddb.query({\n            TableName: 'HS_Promotions',\n            ExpressionAttributeValues: {\n                ':promo': data.promo,\n                ':vendor': data.vendor\n            },\n            KeyConditionExpression: 'promoId = :promo',\n            FilterExpression: 'vendorId = :vendor'\n        }).promise()\n    },\n\n    addToQR: function (qr, uuid) {\n        ddb.put({\n            TableName: 'HS_QR',\n            Item: {\n                'vendorId': qr.vendor,\n                'promoId': qr.promo,\n                'QRId': uuid,\n                'category': qr.type,\n                'user': qr.user,\n                'grabTime': qr.grabTime\n            }\n        }).promise()\n    }\n}",
         "triggers": []
       },
       "1f94f853-5bdb-41ea-afe7-231da7fae32f": {
@@ -269,20 +269,23 @@
     "deletedFiles": [],
     "rootNode": "93ffce99-7f73-47ff-958a-0d6e790962d6",
     "openFiles": [
-      "0ea56e39-0305-4693-9692-86a3206d9a26",
-      "199ba057-a0f1-48a2-aa34-959f29047ff0",
       "507d5999-d6df-45a1-a809-fd4943d3954b",
       "a7f41488-5b3a-43b0-99fe-c0e3dd313f01",
-      "8b217d09-dd2c-4080-8822-152637ae20c2"
+      "8b217d09-dd2c-4080-8822-152637ae20c2",
+      "0136c15c-311e-415a-ad68-78090bf12541",
+      "98bc0377-64db-471d-a7bf-74451db9bf90",
+      "434a5a29-a383-4df0-bed5-0abfa85d17d4",
+      "e3525801-37ee-4812-b654-b95f419c079e",
+      "4ed6d4c5-d54d-482b-b03a-2232e44d86aa"
     ],
-    "currentFileId": "8b217d09-dd2c-4080-8822-152637ae20c2",
+    "currentFileId": "e3525801-37ee-4812-b654-b95f419c079e",
     "resources": {
       "ddbHSPromotions": {
         "name": "ddbHSPromotions",
         "type": "DynamoDB",
         "config": {
           "mode": 1,
-          "operation": "scan",
+          "operation": "query",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_Promotions",
             "name": "HS_Promotions",
@@ -296,9 +299,11 @@
           "parameters": {
             "TableName": "HS_Promotions",
             "ExpressionAttributeValues": {
-              ":date": "@{date}"
+              ":promo": "@{data.promo}",
+              ":vendor": "@{data.vendor}"
             },
-            "FilterExpression": "startDate <= :date and endDate >= :date"
+            "KeyConditionExpression": "promoId = :promo",
+            "FilterExpression": "vendorId = :vendor"
           },
           "validator": {
             "validatableFields": {},
@@ -322,19 +327,18 @@
             "hasSortKey": false,
             "sortKey": "",
             "sortKeyType": "S",
-            "mode": 0
+            "mode": 1
           },
           "parameters": {
-            "Key": {},
+            "TableName": "HS_QR",
             "Item": {
-              "vendorId": "hello",
-              "promoId": "hello",
-              "QRId": "heel",
-              "category": 1,
-              "user": "cassie",
-              "grabTime": 24355768900
-            },
-            "ExpressionAttributeValues": {}
+              "vendorId": "@{qr.vendor}",
+              "promoId": "@{qr.promo}",
+              "QRId": "@{uuid}",
+              "category": "@{qr.type}",
+              "user": "@{qr.user}",
+              "grabTime": "@{qr.grabTime}"
+            }
           },
           "validator": {
             "validatableFields": {},
@@ -440,7 +444,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1543495895115
+    "lastSave": 1543554982465
   },
   "VCS_STATE": {
     "provider": "GitHub",

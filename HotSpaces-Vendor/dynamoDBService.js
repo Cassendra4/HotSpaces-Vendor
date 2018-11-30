@@ -158,5 +158,31 @@ module.exports = {
             UpdateExpression: 'set #category = :category , #description = :category , #discount = :discount , #endDate = :endDate , #endTime = :promoId , #imgUrls = :imgUrls , #latNLong = :latNLong , #locationBox = :locationBox , #offerType = :offerType , #selectedDays = :selectedDays , #startDate = :startDate , #startTime = :startTime',
             ConditionExpression: '#promoId = :promoId'
         }).promise()
+    },
+
+    createQR: function (data) {
+        return ddb.query({
+            TableName: 'HS_Promotions',
+            ExpressionAttributeValues: {
+                ':promo': data.promo,
+                ':vendor': data.vendor
+            },
+            KeyConditionExpression: 'promoId = :promo',
+            FilterExpression: 'vendorId = :vendor'
+        }).promise()
+    },
+
+    addToQR: function (qr, uuid) {
+        ddb.put({
+            TableName: 'HS_QR',
+            Item: {
+                'vendorId': qr.vendor,
+                'promoId': qr.promo,
+                'QRId': uuid,
+                'category': qr.type,
+                'user': qr.user,
+                'grabTime': qr.grabTime
+            }
+        }).promise()
     }
 }
