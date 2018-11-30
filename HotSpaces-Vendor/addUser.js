@@ -3,8 +3,8 @@ const cognito_idp = new AWS.CognitoIdentityServiceProvider();
 let dynamoDBService = require('./dynamoDBService');
 let utils = require('./utils');
 
-exports.handler = function(event, context, callback) {
-    
+exports.handler = function (event, context, callback) {
+
     if (utils.authorize(event, callback)) {
 
         let body = JSON.parse(event.body);
