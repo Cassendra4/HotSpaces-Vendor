@@ -104,7 +104,7 @@ module.exports = {
             TableName: 'HS_Promotions',
             Key: {
                 'promoId': promoData.promoID,
-                'timestamp': timestamp
+                'timestamp': promoData.timestamp
             }
         }).promise()
     },
