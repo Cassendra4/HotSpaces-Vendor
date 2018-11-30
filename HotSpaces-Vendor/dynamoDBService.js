@@ -72,6 +72,7 @@ module.exports = {
     },
 
     addPromo: function (promoData) {
+        console.log('promoData', promoData);
         return ddb.put({
             TableName: 'HS_Promotions',
             Item: {
