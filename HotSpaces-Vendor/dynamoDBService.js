@@ -170,7 +170,7 @@ module.exports = {
         }).promise()
     },
 
-    createQR: function (data) {
+    getPromoWithPromoId: function (data) {
         return ddb.query({
             TableName: 'HS_Promotions',
             ExpressionAttributeValues: {
@@ -194,5 +194,16 @@ module.exports = {
                 'grabTime': qr.grabTime
             }
         }).promise()
+    },
+
+    getQR: function (qr) {
+        ddb.get({
+            TableName: 'HS_QR',
+            Key: {
+                'QRId': qr
+            }
+        }).promise()
     }
+
+
 }

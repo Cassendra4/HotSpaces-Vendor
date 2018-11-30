@@ -1,6 +1,7 @@
 let AWS = require('aws-sdk');
 const ddb = new AWS.DynamoDB.DocumentClient();
 let dynamoDBService = require('./dynamoDBService');
+const uuidv4 = require('uuid/v4');
 
 exports.handler = function (event, context, callback) {
 
@@ -15,17 +16,14 @@ exports.handler = function (event, context, callback) {
             "promo": event.queryStringParameters.promo,
             "vendor": event.queryStringParameters.vendor,
             "type": data.Item.category,
+            "offerType": data.Item.offerType,
             "user": event.queryStringParameters.user,
             "grabTime": event.queryStringParameters.grab
         };
 
         let dt = new Date().getTime();
-        var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-            var r = (dt + Math.random() * 16) % 16 | 0;
-            dt = Math.floor(dt / 16);
-            return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-        });
-        var uuid = qr.type + uuid;
+        var uuid = uuidv4();
+        var uuid = qr.offerType + uuid;
         console.log('loggg', uuid);
         dynamoDBService.addToQR(qr, uuid).then(function (data) {
             let response = {
@@ -38,8 +36,9 @@ exports.handler = function (event, context, callback) {
             };
             callback(null, response);
         }).catch(function (err) {
+            console.log('eerrr', err);
             let response = {
-                "statusCode": 502,
+                "statusCode": 403,
                 "headers": {
                     "my_header": "my_value"
                 },
@@ -51,8 +50,9 @@ exports.handler = function (event, context, callback) {
 
 
     }).catch(function (err) {
+         console.log('eerrr12', err);
         let response = {
-            "statusCode": 502,
+            "statusCode": 403,
             "headers": {
                 "my_header": "my_value"
             },
