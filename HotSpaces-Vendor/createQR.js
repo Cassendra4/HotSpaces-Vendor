@@ -10,9 +10,12 @@ exports.handler = function (event, context, callback) {
         promo: event.queryStringParameters.promo,
         vendor: event.queryStringParameters.vendor
     };
-    dynamoDBService.getPromoWithPromoId(promo).then(function (data) {
+    
+    createQR(promo, callback);
+    function createQR(promo, callback) {
+        dynamoDBService.getPromoWithPromoId(promo).then(function (data) {
         console.log('data 324', data.Items[0]);
-console.log('data 3245', data.Items[0].category);
+    console.log('data 3245', data.Items[0].category);
         let qr = {
             "promo": event.queryStringParameters.promo,
             "vendor": event.queryStringParameters.vendor,
@@ -23,7 +26,7 @@ console.log('data 3245', data.Items[0].category);
         };
         
         var uuid = uuidv4();
-        var uuid = qr.offerType + uuid;
+        var uuid = 3 + uuid;
         console.log('loggg', uuid);
         dynamoDBService.addToQR(qr, uuid).then(function (data) {
             let response = {
@@ -64,4 +67,5 @@ console.log('data 3245', data.Items[0].category);
         };
         callback(null, response);
     });
+    }
 }

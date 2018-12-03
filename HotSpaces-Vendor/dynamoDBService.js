@@ -200,13 +200,17 @@ module.exports = {
     },
 
     getQR: function (qr) {
-        ddb.get({
+        return ddb.get({
             TableName: 'HS_QR',
             Key: {
                 'QRId': qr
             }
         }).promise()
-    }
+    },
 
+    scanRedeem: function (data) {
+       
+
+    }
 
 }
