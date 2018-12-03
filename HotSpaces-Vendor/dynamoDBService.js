@@ -185,6 +185,8 @@ module.exports = {
     },
 
     addToQR: function (qr, uuid) {
+        console.log('qr', qr);
+        console.log('uuid', uuid);
         return ddb.put({
             TableName: 'HS_QR',
             Item: {

@@ -1,6 +1,7 @@
 let AWS = require('aws-sdk');
 const ddb = new AWS.DynamoDB.DocumentClient();
 let dynamoDBService = require('./dynamoDBService');
+let authService = require('./authService');
 const uuidv4 = require('uuid/v4');
 
 exports.handler = function (event, context, callback) {
@@ -10,23 +11,53 @@ exports.handler = function (event, context, callback) {
         promo: event.queryStringParameters.promo,
         vendor: event.queryStringParameters.vendor
     };
+
+    let userUUID = event.queryStringParameters.uuid;
+    let userName = event.queryStringParameters.user;
     
-    createQR(promo, callback);
-    function createQR(promo, callback) {
+     authService.validateUser(userUUID, userName, function (response) {
+        if (response.error) {
+            callback(null, {
+                "isBase64Encoded": true,
+                "statusCode": 502,
+                "headers": {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "*"
+                },
+                "body": JSON.stringify(response.error)
+            });
+        } else if (response.validated) {
+           createQR(event.queryStringParameters,promo, callback);
+        } else {
+            callback(null, {
+                "isBase64Encoded": true,
+                "statusCode": 403,
+                "headers": {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "*"
+                },
+                "body": "User validation failed."
+            });
+        }
+    });
+
+}
+    function createQR(event, promo, callback) {
         dynamoDBService.getPromoWithPromoId(promo).then(function (data) {
         console.log('data 324', data.Items[0]);
-    console.log('data 3245', data.Items[0].category);
+    console.log('data 3245', data.Items[0].offerType);
         let qr = {
-            "promo": event.queryStringParameters.promo,
-            "vendor": event.queryStringParameters.vendor,
+            "promo": event.promo,
+            "vendor": event.vendor,
             "type": parseInt(data.Items[0].category),
             "offerType": parseInt(data.Items[0].offerType),
-            "user": event.queryStringParameters.user,
-            "grabTime": event.queryStringParameters.grab
+            "user": event.user,
+            "grabTime": event.grab
         };
-        
+        console.log('qr', qr);
         var uuid = uuidv4();
-        var uuid = 3 + uuid;
+        console.log('uuid', uuid);
+        var uuid = parseInt(data.Items[0].offerType) + uuid;
         console.log('loggg', uuid);
         dynamoDBService.addToQR(qr, uuid).then(function (data) {
             let response = {
@@ -68,4 +99,3 @@ exports.handler = function (event, context, callback) {
         callback(null, response);
     });
     }
-}

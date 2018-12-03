@@ -1,10 +1,42 @@
 let AWS = require('aws-sdk');
 let dynamoDBService = require('./dynamoDBService');
+let authService = require('./authService');
 
 exports.handler = function (event, context, callback) {
 
-    console.log('data 23e23', event);
-   dynamoDBService.getQR(event.queryStringParameters.qr).then(function (data) {
+ let userUUID = event.queryStringParameters.uuid;
+    let userName = event.queryStringParameters.user;
+    
+     authService.validateUser(userUUID, userName, function (response) {
+        if (response.error) {
+            callback(null, {
+                "isBase64Encoded": true,
+                "statusCode": 502,
+                "headers": {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "*"
+                },
+                "body": JSON.stringify(response.error)
+            });
+        } else if (response.validated) {
+           readQR(event.queryStringParameters, callback);
+        } else {
+            callback(null, {
+                "isBase64Encoded": true,
+                "statusCode": 403,
+                "headers": {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "*"
+                },
+                "body": "User validation failed."
+            });
+        }
+    });
+
+}
+   
+   function readQR(event, callback) { 
+       dynamoDBService.getQR(event.qr).then(function (data) {
        console.log('promoData 2e3', data);
        let promo = {
         promo: data.Item.promoId,
