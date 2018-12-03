@@ -222,15 +222,25 @@ module.exports = {
     putRedeem: function (data) {
         return ddb.put({
             TableName: 'HS_Redeem',
-            Item: { 'promoId': '23', 'userId': 'cassie', 'redeemId': '32144', 'noOfRedeems': 1 }
+            Item: {
+                'promoId': '23',
+                'userId': 'cassie',
+                'redeemId': '32144',
+                'noOfRedeems': 1
+            }
         }).promise()
     },
 
     updateRedeem: function (data) {
-       return ddb.update({
+        return ddb.update({
             TableName: 'HS_Redeem',
-            Key: { 'redeemId': data.redeemId }
-            , ExpressionAttributeValues: { ':redeem': val }, UpdateExpression: 'set noOfRedeems = :redeem'
+            Key: {
+                'redeemId': data.redeemId
+            },
+            ExpressionAttributeValues: {
+                ':redeem': data.val
+            },
+            UpdateExpression: 'set noOfRedeems = :redeem'
         }).promise()
     }
 
