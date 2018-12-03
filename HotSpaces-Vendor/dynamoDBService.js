@@ -209,8 +209,29 @@ module.exports = {
     },
 
     scanRedeem: function (data) {
-       
+        return ddb.scan({
+            TableName: 'HS_Redeem',
+            ExpressionAttributeValues: {
+                ':promo': data.promo,
+                ':user': data.userId
+            },
+            FilterExpression: 'promoId = :promo and userId = :user'
+        }).promise()
+    },
 
+    putRedeem: function (data) {
+        return ddb.put({
+            TableName: 'HS_Redeem',
+            Item: { 'promoId': '23', 'userId': 'cassie', 'redeemId': '32144', 'noOfRedeems': 1 }
+        }).promise()
+    },
+
+    updateRedeem: function (data) {
+       return ddb.update({
+            TableName: 'HS_Redeem',
+            Key: { 'redeemId': data.redeemId }
+            , ExpressionAttributeValues: { ':redeem': val }, UpdateExpression: 'set noOfRedeems = :redeem'
+        }).promise()
     }
 
 }
