@@ -3,12 +3,14 @@ let dynamoDBService = require('./dynamoDBService');
 
 exports.handler = function(event, context, callback) {
      console.log("PromoID ",event.queryStringParameters.promoId);
+      console.log("time ",event.queryStringParameters.timestamp);
+
    // console.log("VendorID ",event.queryStringParameters.vendorId);
     // let body = JSON.parse(event.body);
     // console.log(body);
     let promoData = {
         promoID: event.queryStringParameters.promoId,
-        timestamp: event.queryStringParameters.timestamp
+        timestamp: parseInt(event.queryStringParameters.timestamp)
     };
     dynamoDBService.deletePromo(promoData).then(function(data){
         console.log(data);

@@ -172,6 +172,7 @@ module.exports = {
     },
 
     getPromoWithPromoId: function (data) {
+        console.log('data', data);
         return ddb.query({
             TableName: 'HS_Promotions',
             ExpressionAttributeValues: {
@@ -184,13 +185,14 @@ module.exports = {
     },
 
     addToQR: function (qr, uuid) {
-        ddb.put({
+        return ddb.put({
             TableName: 'HS_QR',
             Item: {
                 'vendorId': qr.vendor,
                 'promoId': qr.promo,
                 'QRId': uuid,
                 'category': qr.type,
+                'offerType': qr.offerType,
                 'user': qr.user,
                 'grabTime': qr.grabTime
             }
