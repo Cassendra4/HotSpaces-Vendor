@@ -1,12 +1,14 @@
 let AWS = require('aws-sdk');
 let dynamoDBService = require('./dynamoDBService');
 const uuidv4 = require('uuid/v4');
+const geoCoder = require('react-native-geocoder');
 
 exports.handler = function(event, context, callback) {
     let timestamp = Math.round((new Date()).getTime() / 1000);
     // console.log(timestamp);
     console.log(event);
     let body = JSON.parse(event.body);
+
     let promoData = {
         promoId : uuidv4(),
         vendorId : body.vendorId,

@@ -22,7 +22,8 @@
           "507d5999-d6df-45a1-a809-fd4943d3954b",
           "a7f41488-5b3a-43b0-99fe-c0e3dd313f01",
           "8b217d09-dd2c-4080-8822-152637ae20c2",
-          "3fd97c9a-d36d-45cf-bb8d-005324d0a31c"
+          "3fd97c9a-d36d-45cf-bb8d-005324d0a31c",
+          "3754dcfe-b4bb-418b-8d10-99e0b63f2552"
         ],
         "isRemovable": false,
         "filePath": "HotSpaces-Vendor"
@@ -49,6 +50,12 @@
             "name": "readQr",
             "functionId": "98bc0377-64db-471d-a7bf-74451db9bf90",
             "event": "{\"queryStringParameters\":{\n    \"qr\": \"2262b1117-cb80-4c8f-aa57-a28afaf9c965\"\n}\n}"
+          },
+          "9a1e5d82-776b-4629-a5b6-44a51bba2b17": {
+            "id": "9a1e5d82-776b-4629-a5b6-44a51bba2b17",
+            "name": "",
+            "functionId": "98bc0377-64db-471d-a7bf-74451db9bf90",
+            "event": "{\n    \"key1\": \"value1\",\n    \"key2\": \"value2\",\n    \"key3\": \"value3\"\n}"
           }
         }
       },
@@ -111,7 +118,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/addPromotion.js",
-        "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\nconst uuidv4 = require('uuid/v4');\n\nexports.handler = function(event, context, callback) {\n    let timestamp = Math.round((new Date()).getTime() / 1000);\n    // console.log(timestamp);\n    console.log(event);\n    let body = JSON.parse(event.body);\n    let promoData = {\n        promoId : uuidv4(),\n        vendorId : body.vendorId,\n        offerType : body.offerType,\n        discount : body.discount,\n        startDate : body.startDate,\n        endDate : body.endDate,\n        startTime: body.startTime,\n        endTime: body.endTime,\n        selectedDays : body.selectedDays,\n        description : body.description,\n        title : body.title,\n        unitPrice : body.unitPrice,\n        imgUrl : body.imgUrls,\n        terms : body.terms,\n        businessType : body.businessType,\n        timestamp: timestamp,\n        locationBox: body.locationBox,\n        latNLong: body.latNLong\n    };\n    dynamoDBService.addPromo(promoData)\n        .then(function (data) {\n        console.log(\"Success\", data);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 200,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": JSON.stringify(promoData)\n            });\n        }).catch(function (err) {\n            console.log(\"Error\", err);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": err.message\n            });\n        });\n        \n}",
+        "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\nconst uuidv4 = require('uuid/v4');\nconst geoCoder = require('react-native-geocoder');\n\nexports.handler = function(event, context, callback) {\n    let timestamp = Math.round((new Date()).getTime() / 1000);\n    // console.log(timestamp);\n    console.log(event);\n    let body = JSON.parse(event.body);\n\n    let promoData = {\n        promoId : uuidv4(),\n        vendorId : body.vendorId,\n        offerType : body.offerType,\n        discount : body.discount,\n        startDate : body.startDate,\n        endDate : body.endDate,\n        startTime: body.startTime,\n        endTime: body.endTime,\n        selectedDays : body.selectedDays,\n        description : body.description,\n        title : body.title,\n        unitPrice : body.unitPrice,\n        imgUrl : body.imgUrls,\n        terms : body.terms,\n        businessType : body.businessType,\n        timestamp: timestamp,\n        locationBox: body.locationBox,\n        latNLong: body.latNLong\n    };\n    dynamoDBService.addPromo(promoData)\n        .then(function (data) {\n        console.log(\"Success\", data);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 200,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": JSON.stringify(promoData)\n            });\n        }).catch(function (err) {\n            console.log(\"Error\", err);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": err.message\n            });\n        });\n        \n}",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -306,17 +313,40 @@
           "timeout": 60,
           "memory": 128
         }
+      },
+      "3754dcfe-b4bb-418b-8d10-99e0b63f2552": {
+        "id": "3754dcfe-b4bb-418b-8d10-99e0b63f2552",
+        "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
+        "name": "testLambda.js",
+        "type": "LAMBDA_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "HotSpaces-Vendor/testLambda.js",
+        "code": "const Geocoder = require('react-native-geocoder');\n\nexports.handler = function(event, context, callback) {\n    \n    let NY = {\n        lat: 40.7809261,\n        lng: -73.9637594\n    };\n    geoCoder.geocodePosition(NY).then(res => {\n        console.log(res);\n    // res is an Array of geocoding object (see below)\n    })\n    .catch(err => console.log(err))\n        callback(null, {\"message\": \"Successfully executed\"});\n    }",
+        "triggers": [],
+        "config": {
+          "runtime": "nodejs8.10",
+          "timeout": 60,
+          "memory": 128
+        },
+        "testCases": {
+          "86b77db4-bd5d-4578-a4fb-9bcb16fcda65": {
+            "id": "86b77db4-bd5d-4578-a4fb-9bcb16fcda65",
+            "name": "Unnamed event",
+            "functionId": "3754dcfe-b4bb-418b-8d10-99e0b63f2552",
+            "event": "{\n    \"key1\": \"value1\",\n    \"key2\": \"value2\",\n    \"key3\": \"value3\"\n}"
+          }
+        }
       }
     },
     "deletedFiles": [],
     "rootNode": "93ffce99-7f73-47ff-958a-0d6e790962d6",
     "openFiles": [
-      "98bc0377-64db-471d-a7bf-74451db9bf90",
-      "434a5a29-a383-4df0-bed5-0abfa85d17d4",
-      "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
-      "e3525801-37ee-4812-b654-b95f419c079e"
+      "0136c15c-311e-415a-ad68-78090bf12541",
+      "3754dcfe-b4bb-418b-8d10-99e0b63f2552"
     ],
-    "currentFileId": "434a5a29-a383-4df0-bed5-0abfa85d17d4",
+    "currentFileId": "3754dcfe-b4bb-418b-8d10-99e0b63f2552",
     "resources": {
       "ddbHSPromotions": {
         "name": "ddbHSPromotions",
@@ -840,6 +870,10 @@
         "axios": {
           "name": "axios",
           "version": "0.18.0"
+        },
+        "react-native-geocoder": {
+          "name": "react-native-geocoder",
+          "version": "0.5.0"
         }
       }
     },
@@ -851,8 +885,8 @@
     "projectVersion": "1.0.0",
     "projectRegion": "us-east-1",
     "platform": "AWS",
-    "platformRegions": {},
-    "lastSave": 1543830514083
+    "lastSave": 1543988266058,
+    "platformRegions": {}
   },
   "VCS_STATE": {
     "provider": "GitHub",
