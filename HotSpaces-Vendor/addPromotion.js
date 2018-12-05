@@ -1,15 +1,28 @@
 let AWS = require('aws-sdk');
 let dynamoDBService = require('./dynamoDBService');
 const uuidv4 = require('uuid/v4');
-const geoCoder = require('react-native-geocoder');
+const NodeGeocoder = require('node-geocoder');
 
 exports.handler = function(event, context, callback) {
-    let timestamp = Math.round((new Date()).getTime() / 1000);
-    // console.log(timestamp);
-    console.log(event);
+    
     let body = JSON.parse(event.body);
+    let timestamp = Math.round((new Date()).getTime() / 1000);
 
-    let promoData = {
+    const options = {
+        provider: 'google',
+
+        httpAdapter: 'https',
+        apiKey: process.env.mapsApiKey,
+        formatter: null
+    };
+
+    let geocoder = NodeGeocoder(options);
+
+    geocoder.reverse({ lat: body.latNLong.lat, lon: body.latNLong.long }).then(res => {
+        console.log(res);
+        let address = res[0].formattedAddress
+
+        let promoData = {
         promoId : uuidv4(),
         vendorId : body.vendorId,
         offerType : body.offerType,
@@ -27,8 +40,10 @@ exports.handler = function(event, context, callback) {
         businessType : body.businessType,
         timestamp: timestamp,
         locationBox: body.locationBox,
-        latNLong: body.latNLong
+        latNLong: body.latNLong,
+        address: address
     };
+    console.log("PromoData$$$", promoData)
     dynamoDBService.addPromo(promoData)
         .then(function (data) {
         console.log("Success", data);
@@ -53,5 +68,9 @@ exports.handler = function(event, context, callback) {
                 "body": err.message
             });
         });
+
+    }).catch(err => {
+        console.log(err);
+    })
         
 }

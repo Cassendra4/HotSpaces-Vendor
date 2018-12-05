@@ -93,10 +93,10 @@ module.exports = {
                 'category': promoData.businessType,
                 'timestamp': promoData.timestamp,
                 'locationBox': promoData.locationBox,
-                'latNLong': promoData.latNLong
+                'latNLong': promoData.latNLong,
+                'address': promoData.address
             }
         }).promise()
-
     },
 
     deletePromo: function (promoData) {

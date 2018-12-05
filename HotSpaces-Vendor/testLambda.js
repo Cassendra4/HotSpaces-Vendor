@@ -1,18 +1,24 @@
-const geoCoder = require('node-geocoder');
+var NodeGeocoder = require('node-geocoder');
 
-exports.handler = function(event, context, callback) {
-    
-    let NY = {
-        lat: 40.7809261,
-        lng: -73.9637594
+
+exports.handler = function (event, context, callback) {
+    console.log("API", process.env.mapsApiKey);
+    var options = {
+        provider: 'google',
+
+        // Optional depending on the providers
+        httpAdapter: 'https', // Default
+        apiKey: process.env.mapsApiKey, // for Mapquest, OpenCage, Google Premier
+        formatter: null         // 'gpx', 'string', ...
     };
-    geoCoder.reverse({lat:45.767, lon:4.833})
-  .then(function(res) {
-    console.log(res);
-  })
-  .catch(function(err) {
-    console.log(err);
-  });
 
-        callback(null, {"message": "Successfully executed"});
-    }
+    let geocoder = NodeGeocoder(options);
+    let address;
+    geocoder.reverse({ lat: 6.886728000000001, lon: 79.8588762 }).then(res => {
+        console.log(res[0].formattedAddress);
+    }).catch(err => {
+        console.log(err);
+    })
+
+    callback(null, { "message": "Successfully executed" });
+}
