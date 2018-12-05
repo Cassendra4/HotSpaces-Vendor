@@ -22,8 +22,7 @@
           "507d5999-d6df-45a1-a809-fd4943d3954b",
           "a7f41488-5b3a-43b0-99fe-c0e3dd313f01",
           "8b217d09-dd2c-4080-8822-152637ae20c2",
-          "3fd97c9a-d36d-45cf-bb8d-005324d0a31c",
-          "3754dcfe-b4bb-418b-8d10-99e0b63f2552"
+          "3fd97c9a-d36d-45cf-bb8d-005324d0a31c"
         ],
         "isRemovable": false,
         "filePath": "HotSpaces-Vendor"
@@ -214,12 +213,20 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/getPromotions.js",
-        "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet moment = require('moment');\nlet axios = require('axios');\n\nexports.handler = function(event, context, callback) {\n   console.log(event);\n    let date = moment(new Date(Number(event.queryStringParameters.date))).format('YYYY-MM-DD');\n    console.log(date);\n    let promos = {};\n    dynamoDBService.retrievePromos(date).then(function (data) {\n        // axios.get()\n        // console.log(data);\n        \n        for (let i = 0; i < data.Items.length; i++) {\n            let promoId = data.Items[i].PromoId\n            promos[promoId] = {\n                    title: data.Items[i].Title,\n                    description: data.Items[i].Description,\n                    startDate: data.Items[i].StartDate,\n                    endDate: data.Items[i].EndDate,\n                    startTime: data.Items[i].StartTime,\n                    endTime: data.Items[i].EndTime,\n                    vendorId: data.Items[i].VendorId,\n                    businessType: data.Items[i].BusinessType,\n                    discount: data.Items[i].Discount,\n                    imgs: data.Items[i].ImgUrls,\n                    offerType: data.Items[i].OfferType,\n                    terms: data.Items[i].Terms,\n                    selectedDays: data.Items[i].selectedDays,\n                    unitPrice: data.Items[i].UnitPrice \n            }\n            console.log(\"Third\", promos.promoId);\n            let vendorId = data.Items[i].VendorId;\n            // dynamoDBService.getVendor(\"432aebe0-dba8-4aba-8881-30d54e70b84d\").then(function (vendorData) {\n            //     //your logic goes here\n            //     console.log(\"First\", vendorData.Item.name);\n            //     console.log(\"Second\", promoId);\n            //     // console.log(\"Third\", promos.promoId);\n            //     // promos.data.Items[i].PromoId[\"vendorName\"] = vendorData.Item.name;\n            // }).catch(function (err) {\n            //     //handle error\n            //     console.log(err);\n            // });\n            \n        }\n        // console.log(promos);\n        callback(null, {\n            \"isBase64Encoded\": true,\n            \"statusCode\": 200,\n            \"headers\": {\n                \"Access-Control-Allow-Origin\": \"*\",\n                \"Access-Control-Allow-Methods\": \"*\"\n            },\n            \"body\": JSON.stringify(data.Items)\n        });\n    }).catch(function (err) {\n        callback(null, {\n            \"isBase64Encoded\": true,\n            \"statusCode\": 502,\n            \"headers\": {\n                \"Access-Control-Allow-Origin\": \"*\",\n                \"Access-Control-Allow-Methods\": \"*\"\n            },\n            \"body\": err.message\n        });\n    });\n}",
+        "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet moment = require('moment');\nlet axios = require('axios');\n\nexports.handler = function (event, context, callback) {\n    console.log(event);\n    let date = moment.unix(Number(event.queryStringParameters.date)).format('YYYY-MM-DD');\n    console.log(date);\n\n    dynamoDBService.retrievePromos(date).then(function (data) {\n        // axios.get()\n        // console.log(data);\n\n        for (let i = 0; i < data.Items.length; i++) {\n            let promos = {};\n            let promoId = data.Items[i].promoId\n            // console.log(\"Third\", promos);\n            let vendorId = data.Items[i].vendorId;\n            dynamoDBService.getVendor(\"33cc6431-a133-447d-82f8-40b1529ee2bd\").then(function (vendorData) {\n                //your logic goes here\n                console.log(\"First\", vendorData.Items[0].name);\n                promos[promoId] = {\n                    title: data.Items[i].title,\n                    description: data.Items[i].description,\n                    startDate: data.Items[i].startDate,\n                    endDate: data.Items[i].endDate,\n                    startTime: data.Items[i].startTime,\n                    endTime: data.Items[i].endTime,\n                    vendorId: data.Items[i].vendorId,\n                    businessType: data.Items[i].businessType,\n                    discount: data.Items[i].discount,\n                    imgs: data.Items[i].imgUrls,\n                    offerType: data.Items[i].offerType,\n                    terms: data.Items[i].termsNConditions,\n                    selectedDays: data.Items[i].selectedDays,\n                    unitPrice: data.Items[i].unitPrice,\n                    latNLong: data.Items[i].latNLong,\n                    address: data.Items[i].address,\n                    vendorName: vendorData.Items[0].name\n            }\n\n                callback(null, {\n                    \"isBase64Encoded\": true,\n                    \"statusCode\": 200,\n                    \"headers\": {\n                        \"Access-Control-Allow-Origin\": \"*\",\n                        \"Access-Control-Allow-Methods\": \"*\"\n                    },\n                    \"body\": JSON.stringify(promos)\n                });\n            }).catch(function (err) {\n                //handle error\n                console.log(err);\n            });\n        }\n        // console.log(promos);\n\n    }).catch(function (err) {\n        callback(null, {\n            \"isBase64Encoded\": true,\n            \"statusCode\": 502,\n            \"headers\": {\n                \"Access-Control-Allow-Origin\": \"*\",\n                \"Access-Control-Allow-Methods\": \"*\"\n            },\n            \"body\": err.message\n        });\n    });\n}",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
           "timeout": 60,
           "memory": 128
+        },
+        "testCases": {
+          "a1c1f5b8-325d-4a2d-8747-c32117f226ba": {
+            "id": "a1c1f5b8-325d-4a2d-8747-c32117f226ba",
+            "name": "getPromotions",
+            "functionId": "1f94f853-5bdb-41ea-afe7-231da7fae32f",
+            "event": "{\"queryStringParameters\":{\n     \"date\": 1543838840\n}\n   \n}"
+          }
         }
       },
       "0ea56e39-0305-4693-9692-86a3206d9a26": {
@@ -313,39 +320,16 @@
           "timeout": 60,
           "memory": 128
         }
-      },
-      "3754dcfe-b4bb-418b-8d10-99e0b63f2552": {
-        "id": "3754dcfe-b4bb-418b-8d10-99e0b63f2552",
-        "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
-        "name": "testLambda.js",
-        "type": "LAMBDA_FILE",
-        "isDirectory": false,
-        "children": [],
-        "isRemovable": true,
-        "filePath": "HotSpaces-Vendor/testLambda.js",
-        "code": "var NodeGeocoder = require('node-geocoder');\n\n\nexports.handler = function (event, context, callback) {\n    console.log(\"API\", process.env.mapsApiKey);\n    var options = {\n        provider: 'google',\n\n        // Optional depending on the providers\n        httpAdapter: 'https', // Default\n        apiKey: process.env.mapsApiKey, // for Mapquest, OpenCage, Google Premier\n        formatter: null         // 'gpx', 'string', ...\n    };\n\n    let geocoder = NodeGeocoder(options);\n    let address;\n    geocoder.reverse({ lat: 6.886728000000001, lon: 79.8588762 }).then(res => {\n        console.log(res[0].formattedAddress);\n    }).catch(err => {\n        console.log(err);\n    })\n\n    callback(null, { \"message\": \"Successfully executed\" });\n}",
-        "triggers": [],
-        "config": {
-          "runtime": "nodejs8.10",
-          "timeout": 60,
-          "memory": 128
-        },
-        "testCases": {
-          "86b77db4-bd5d-4578-a4fb-9bcb16fcda65": {
-            "id": "86b77db4-bd5d-4578-a4fb-9bcb16fcda65",
-            "name": "Unnamed event",
-            "functionId": "3754dcfe-b4bb-418b-8d10-99e0b63f2552",
-            "event": "{\n    \"key1\": \"value1\",\n    \"key2\": \"value2\",\n    \"key3\": \"value3\"\n}"
-          }
-        }
       }
     },
-    "deletedFiles": [],
+    "deletedFiles": [
+      "HotSpaces-Vendor/testLambda.js"
+    ],
     "rootNode": "93ffce99-7f73-47ff-958a-0d6e790962d6",
     "openFiles": [
       "0136c15c-311e-415a-ad68-78090bf12541",
-      "3754dcfe-b4bb-418b-8d10-99e0b63f2552",
-      "4ed6d4c5-d54d-482b-b03a-2232e44d86aa"
+      "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
+      "1f94f853-5bdb-41ea-afe7-231da7fae32f"
     ],
     "currentFileId": "0136c15c-311e-415a-ad68-78090bf12541",
     "resources": {
@@ -909,7 +893,7 @@
     "projectVersion": "1.0.0",
     "projectRegion": "us-east-1",
     "platform": "AWS",
-    "lastSave": 1544000759034,
+    "lastSave": 1544004798794,
     "platformRegions": {}
   },
   "VCS_STATE": {
