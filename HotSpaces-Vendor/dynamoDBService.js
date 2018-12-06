@@ -143,7 +143,6 @@ module.exports = {
                 '#discount': 'discount',
                 '#endDate': 'endDate',
                 '#endTime': 'endTime',
-                '#imgUrls': 'imgUrls',
                 '#latNLong': 'latNLong',
                 '#locationBox': 'locationBox',
                 '#offerType': 'offerType',
@@ -158,7 +157,6 @@ module.exports = {
                 ':discount': updatedData.discount,
                 ':endDate': updatedData.endDate,
                 ':endTime': updatedData.endTime,
-                ':imgUrls': updatedData.imgUrl,
                 ':latNLong': updatedData.latNLong,
                 ':locationBox': updatedData.locationBox,
                 ':offerType': updatedData.offerType,
@@ -166,7 +164,7 @@ module.exports = {
                 ':startDate': updatedData.startDate,
                 ':startTime': updatedData.startTime
             },
-            UpdateExpression: 'set #category = :category , #description = :category , #discount = :discount , #endDate = :endDate , #endTime = :promoId , #imgUrls = :imgUrls , #latNLong = :latNLong , #locationBox = :locationBox , #offerType = :offerType , #selectedDays = :selectedDays , #startDate = :startDate , #startTime = :startTime',
+            UpdateExpression: 'set #category = :category , #description = :category , #discount = :discount , #endDate = :endDate , #endTime = :promoId , #latNLong = :latNLong , #locationBox = :locationBox , #offerType = :offerType , #selectedDays = :selectedDays , #startDate = :startDate , #startTime = :startTime',
             ConditionExpression: '#promoId = :promoId'
         }).promise()
     },

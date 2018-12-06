@@ -2,6 +2,7 @@ let AWS = require('aws-sdk');
 let dynamoDBService = require('./dynamoDBService');
 
 exports.handler = function(event, context, callback) {
+    console.log(event);
      let updatedData = {
         promoId: body.promoId,
         vendorId: body.vendorId,
@@ -15,7 +16,7 @@ exports.handler = function(event, context, callback) {
         description: body.description,
         title: body.title,
         unitPrice: body.unitPrice,
-        imgUrl: body.imgUrls,
+        // imgUrl: body.imgUrls,
         terms: body.terms,
         businessType: body.businessType,
         timestamp: timestamp,
