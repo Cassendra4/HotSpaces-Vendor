@@ -213,7 +213,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/getPromotions.js",
-        "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet moment = require('moment');\nlet axios = require('axios');\n\nexports.handler = function (event, context, callback) {\n    console.log(event);\n    let date = moment.unix(Number(event.queryStringParameters.date)).format('YYYY-MM-DD');\n    console.log(date);\n\n    dynamoDBService.retrievePromos(date).then(function (data) {\n        // axios.get()\n        // console.log(data);\n\n        for (let i = 0; i < data.Items.length; i++) {\n            let promos = {};\n            let promoId = data.Items[i].promoId\n            // console.log(\"Third\", promos);\n            let vendorId = data.Items[i].vendorId;\n            dynamoDBService.getVendor(\"33cc6431-a133-447d-82f8-40b1529ee2bd\").then(function (vendorData) {\n                //your logic goes here\n                console.log(\"First\", vendorData.Items[0].name);\n                promos[promoId] = {\n                    title: data.Items[i].title,\n                    description: data.Items[i].description,\n                    startDate: data.Items[i].startDate,\n                    endDate: data.Items[i].endDate,\n                    startTime: data.Items[i].startTime,\n                    endTime: data.Items[i].endTime,\n                    vendorId: data.Items[i].vendorId,\n                    businessType: data.Items[i].businessType,\n                    discount: data.Items[i].discount,\n                    imgs: data.Items[i].imgUrls,\n                    offerType: data.Items[i].offerType,\n                    terms: data.Items[i].termsNConditions,\n                    selectedDays: data.Items[i].selectedDays,\n                    unitPrice: data.Items[i].unitPrice,\n                    latNLong: data.Items[i].latNLong,\n                    address: data.Items[i].address,\n                    vendorName: vendorData.Items[0].name\n            }\n\n                callback(null, {\n                    \"isBase64Encoded\": true,\n                    \"statusCode\": 200,\n                    \"headers\": {\n                        \"Access-Control-Allow-Origin\": \"*\",\n                        \"Access-Control-Allow-Methods\": \"*\"\n                    },\n                    \"body\": JSON.stringify(promos)\n                });\n            }).catch(function (err) {\n                //handle error\n                console.log(err);\n            });\n        }\n        // console.log(promos);\n\n    }).catch(function (err) {\n        callback(null, {\n            \"isBase64Encoded\": true,\n            \"statusCode\": 502,\n            \"headers\": {\n                \"Access-Control-Allow-Origin\": \"*\",\n                \"Access-Control-Allow-Methods\": \"*\"\n            },\n            \"body\": err.message\n        });\n    });\n}",
+        "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet moment = require('moment');\nlet axios = require('axios');\nconst Math = require('mathjs')\n\nexports.handler = function (event, context, callback) {\n    console.log(event);\n    let date = moment.unix(Number(event.queryStringParameters.date)).format('YYYY-MM-DD');\n    console.log(date);\n\n   \n}\n\nfunction getPromotions(date,currentLocation, radius, callback){\n    let promos = {};\n\n    let boxRef = calculateBox(currentLocation);\n    let noOfBox = getNumberOfBoxes(radius);\n    \n    dynamoDBService.retrievePromos(date).then(function (data) {\n        // axios.get()\n        // console.log(data);\n\n        for (let i = 0; i < data.Items.length; i++) {\n            let promos = {};\n            let promoId = data.Items[i].promoId\n            // console.log(\"Third\", promos);\n            let vendorId = data.Items[i].vendorId;\n            dynamoDBService.getVendor(\"33cc6431-a133-447d-82f8-40b1529ee2bd\").then(function (vendorData) {\n                //your logic goes here\n                console.log(\"First\", vendorData.Items[0].name);\n                promos[promoId] = {\n                    title: data.Items[i].title,\n                    description: data.Items[i].description,\n                    startDate: data.Items[i].startDate,\n                    endDate: data.Items[i].endDate,\n                    startTime: data.Items[i].startTime,\n                    endTime: data.Items[i].endTime,\n                    vendorId: data.Items[i].vendorId,\n                    businessType: data.Items[i].businessType,\n                    discount: data.Items[i].discount,\n                    imgs: data.Items[i].imgUrls,\n                    offerType: data.Items[i].offerType,\n                    terms: data.Items[i].termsNConditions,\n                    selectedDays: data.Items[i].selectedDays,\n                    unitPrice: data.Items[i].unitPrice,\n                    latNLong: data.Items[i].latNLong,\n                    address: data.Items[i].address,\n                    vendorName: vendorData.Items[0].name\n            }\n\n                callback(null, {\n                    \"isBase64Encoded\": true,\n                    \"statusCode\": 200,\n                    \"headers\": {\n                        \"Access-Control-Allow-Origin\": \"*\",\n                        \"Access-Control-Allow-Methods\": \"*\"\n                    },\n                    \"body\": JSON.stringify(promos)\n                });\n            }).catch(function (err) {\n                //handle error\n                console.log(err);\n            });\n        }\n        // console.log(promos);\n\n    }).catch(function (err) {\n        callback(null, {\n            \"isBase64Encoded\": true,\n            \"statusCode\": 502,\n            \"headers\": {\n                \"Access-Control-Allow-Origin\": \"*\",\n                \"Access-Control-Allow-Methods\": \"*\"\n            },\n            \"body\": err.message\n        });\n    });\n}\n\nfunction calculateBox(lat, long){\n      let latKey = Math.trunc((latitude + 90) * 10);\n        let longKey = Math.trunc((longitude + 180) * 10);\n        return {lat: latKey, long: longKey};\n}\n\nfunction getNumberOfBoxes(radiusInMeters){\n        let numberOfBoxes = Math.ceil(radiusInMeters / 10000);\n        return numberOfBoxes;\n}\n\n",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -326,9 +326,10 @@
     "rootNode": "93ffce99-7f73-47ff-958a-0d6e790962d6",
     "openFiles": [
       "dac9deff-34fa-46f9-81b9-d82feaf60240",
-      "4ed6d4c5-d54d-482b-b03a-2232e44d86aa"
+      "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
+      "1f94f853-5bdb-41ea-afe7-231da7fae32f"
     ],
-    "currentFileId": "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
+    "currentFileId": "1f94f853-5bdb-41ea-afe7-231da7fae32f",
     "resources": {
       "ddbHSPromotions": {
         "name": "ddbHSPromotions",
@@ -893,6 +894,10 @@
         "node-geocoder": {
           "name": "node-geocoder",
           "version": "3.22.0"
+        },
+        "mathjs": {
+          "name": "mathjs",
+          "version": "5.3.1"
         }
       }
     },
@@ -904,8 +909,8 @@
     "projectVersion": "1.0.0",
     "projectRegion": "us-east-1",
     "platform": "AWS",
-    "lastSave": 1544073818425,
-    "platformRegions": {}
+    "platformRegions": {},
+    "lastSave": 1544090554105
   },
   "VCS_STATE": {
     "provider": "GitHub",

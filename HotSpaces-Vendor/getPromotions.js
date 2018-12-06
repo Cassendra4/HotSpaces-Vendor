@@ -3,12 +3,22 @@ let dynamoDBService = require('./dynamoDBService');
 const ddb = new AWS.DynamoDB.DocumentClient();
 let moment = require('moment');
 let axios = require('axios');
+const Math = require('mathjs')
 
 exports.handler = function (event, context, callback) {
     console.log(event);
     let date = moment.unix(Number(event.queryStringParameters.date)).format('YYYY-MM-DD');
     console.log(date);
 
+   
+}
+
+function getPromotions(date,currentLocation, radius, callback){
+    let promos = {};
+
+    let boxRef = calculateBox(currentLocation);
+    let noOfBox = getNumberOfBoxes(radius);
+    
     dynamoDBService.retrievePromos(date).then(function (data) {
         // axios.get()
         // console.log(data);
@@ -69,3 +79,15 @@ exports.handler = function (event, context, callback) {
         });
     });
 }
+
+function calculateBox(lat, long){
+      let latKey = Math.trunc((latitude + 90) * 10);
+        let longKey = Math.trunc((longitude + 180) * 10);
+        return {lat: latKey, long: longKey};
+}
+
+function getNumberOfBoxes(radiusInMeters){
+        let numberOfBoxes = Math.ceil(radiusInMeters / 10000);
+        return numberOfBoxes;
+}
+
