@@ -117,7 +117,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/addPromotion.js",
-        "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\nconst uuidv4 = require('uuid/v4');\nconst NodeGeocoder = require('node-geocoder');\n\nexports.handler = function(event, context, callback) {\n    \n    let body = JSON.parse(event.body);\n    let timestamp = Math.round((new Date()).getTime() / 1000);\n\n    const options = {\n        provider: 'google',\n\n        httpAdapter: 'https',\n        apiKey: process.env.mapsApiKey,\n        formatter: null\n    };\n\n    let geocoder = NodeGeocoder(options);\n\n    geocoder.reverse({ lat: body.latNLong.lat, lon: body.latNLong.long }).then(res => {\n        console.log(res);\n        let address = res[0].formattedAddress\n\n        let promoData = {\n        promoId : uuidv4(),\n        vendorId : body.vendorId,\n        offerType : body.offerType,\n        discount : body.discount,\n        startDate : body.startDate,\n        endDate : body.endDate,\n        startTime: body.startTime,\n        endTime: body.endTime,\n        selectedDays : body.selectedDays,\n        description : body.description,\n        title : body.title,\n        unitPrice : body.unitPrice,\n        imgUrl : body.imgUrls,\n        terms : body.terms,\n        businessType : body.businessType,\n        timestamp: timestamp,\n        locationBox: body.locationBox,\n        latNLong: body.latNLong,\n        address: address\n    };\n    console.log(\"PromoData$$$\", promoData)\n    dynamoDBService.addPromo(promoData)\n        .then(function (data) {\n        console.log(\"Success\", data);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 200,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": JSON.stringify(promoData)\n            });\n        }).catch(function (err) {\n            console.log(\"Error\", err);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": err.message\n            });\n        });\n\n    }).catch(err => {\n        console.log(err);\n    })\n        \n}",
+        "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\nconst uuidv4 = require('uuid/v4');\nconst NodeGeocoder = require('node-geocoder');\n\nexports.handler = function (event, context, callback) {\n\n    let body = JSON.parse(event.body);\n    let timestamp = Math.round((new Date()).getTime() / 1000);\n\n    const options = {\n        provider: 'google',\n\n        httpAdapter: 'https',\n        apiKey: process.env.mapsApiKey,\n        formatter: null\n    };\n\n    let geocoder = NodeGeocoder(options);\n    console.log(\"GeoLocator\");\n    geocoder.reverse({ lat: body.latNLong.lat, lon: body.latNLong.long })\n        .then(res => {\n            console.log(res);\n            let address = res[0].formattedAddress\n            let promoData = {\n                promoId: uuidv4(),\n                vendorId: body.vendorId,\n                offerType: body.offerType,\n                discount: body.discount,\n                startDate: body.startDate,\n                endDate: body.endDate,\n                startTime: body.startTime,\n                endTime: body.endTime,\n                selectedDays: body.selectedDays,\n                description: body.description,\n                title: body.title,\n                unitPrice: body.unitPrice,\n                imgUrl: body.imgUrls,\n                terms: body.terms,\n                businessType: body.businessType,\n                timestamp: timestamp,\n                locationBox: body.locationBox,\n                latNLong: body.latNLong,\n                address: address\n            };\n            console.log(\"PromoData$$$\", promoData)\n            dynamoDBService.addPromo(promoData)\n                .then(function (data) {\n                    console.log(\"Success\", data);\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 200,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": JSON.stringify(promoData)\n                    });\n                }).catch(function (err) {\n                    console.log(\"Error\", err);\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 502,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": err.message\n                    });\n                });\n\n        }).catch(err => {\n            console.log(\"error\", err.message);\n        })\n\n}",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -322,16 +322,12 @@
         }
       }
     },
-    "deletedFiles": [
-      "HotSpaces-Vendor/testLambda.js"
-    ],
+    "deletedFiles": [],
     "rootNode": "93ffce99-7f73-47ff-958a-0d6e790962d6",
     "openFiles": [
-      "0136c15c-311e-415a-ad68-78090bf12541",
-      "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
-      "1f94f853-5bdb-41ea-afe7-231da7fae32f"
+      "fee713c1-57ce-4563-8763-b5987d956e02"
     ],
-    "currentFileId": "0136c15c-311e-415a-ad68-78090bf12541",
+    "currentFileId": "fee713c1-57ce-4563-8763-b5987d956e02",
     "resources": {
       "ddbHSPromotions": {
         "name": "ddbHSPromotions",
@@ -893,7 +889,7 @@
     "projectVersion": "1.0.0",
     "projectRegion": "us-east-1",
     "platform": "AWS",
-    "lastSave": 1544004798794,
+    "lastSave": 1544070397500,
     "platformRegions": {}
   },
   "VCS_STATE": {
