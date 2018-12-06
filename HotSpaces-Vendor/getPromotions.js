@@ -3,13 +3,44 @@ let dynamoDBService = require('./dynamoDBService');
 const ddb = new AWS.DynamoDB.DocumentClient();
 let moment = require('moment');
 let axios = require('axios');
-const Math = require('mathjs')
+const Math = require('mathjs');
+let authService = require('./authService');
 
 exports.handler = function (event, context, callback) {
     console.log(event);
     let date = moment.unix(Number(event.queryStringParameters.date)).format('YYYY-MM-DD');
     console.log(date);
+    let userUUID = event.queryStringParameters.uuid;
+    let userName = event.queryStringParameters.user;
+    
+    let location = null;
+    let radius = null;
 
+     authService.validateUser(userUUID, userName, function (response) {
+        if (response.error) {
+            callback(null, {
+                "isBase64Encoded": true,
+                "statusCode": 502,
+                "headers": {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "*"
+                },
+                "body": JSON.stringify(response.error)
+            });
+        } else if (response.validated) {
+           getPromotions(data, location, radius, callback);
+        } else {
+            callback(null, {
+                "isBase64Encoded": true,
+                "statusCode": 403,
+                "headers": {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "*"
+                },
+                "body": "User validation failed."
+            });
+        }
+    });
    
 }
 
