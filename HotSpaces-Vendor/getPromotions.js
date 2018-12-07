@@ -3,6 +3,7 @@ let dynamoDBService = require('./dynamoDBService');
 const ddb = new AWS.DynamoDB.DocumentClient();
 let moment = require('moment');
 let axios = require('axios');
+let _ = require("lodash");
 let authService = require('./authService');
 
 exports.handler = function (event, context, callback) {
@@ -16,9 +17,6 @@ exports.handler = function (event, context, callback) {
     let radius = event.queryStringParameters.radius;
 
 
-    
-    // let location = null;
-    // let radius = null;
 
      authService.validateUser(userUUID, userName, function (response) {
         if (response.error) {
@@ -32,8 +30,30 @@ exports.handler = function (event, context, callback) {
                 "body": JSON.stringify(response.error)
             });
         } else if (response.validated) {
-            console.log("lat", latitude);
-           getPromotions( date,latitude, longitude, radius, callback);
+
+            boxKeyObject = calculateBox(latitude, longitude);
+            noOfBoxes = getNumberOfBoxes(radius);
+
+            latMin = +boxKeyObject.lat - +noOfBoxes
+            latMax = +boxKeyObject.lat + +noOfBoxes
+            longMin = +boxKeyObject.long - +noOfBoxes
+            longMax = +boxKeyObject.long + +noOfBoxes
+
+            getPromotions(latMin, latMax, longMin, longMax, date)
+                .then(data => {
+                    console.log("%%%%", data);
+                    let promoList = data;
+                    callback(null, {
+                        "isBase64Encoded": true,
+                        "statusCode": 200,
+                        "headers": {
+                            "Access-Control-Allow-Origin": "*",
+                            "Access-Control-Allow-Methods": "*"
+                        },
+                        "body": JSON.stringify(promoList)
+                    });
+                })
+
         } else {
             callback(null, {
                 "isBase64Encoded": true,
@@ -49,140 +69,24 @@ exports.handler = function (event, context, callback) {
    
 }
 
-function getPromotions(date, latitude, longitude, radius, callback) {
-    let promos = {};
-    console.log("latInFunc", latitude);
-    let boxKeyObject = calculateBox(latitude, longitude);
-    console.log("BoxKey", boxKeyObject);
-    let noOfBoxes = getNumberOfBoxes(radius);
-    console.log("Boxes", noOfBoxes);
-    for (let i = (+boxKeyObject.lat - +noOfBoxes); i <= (+boxKeyObject.lat + +noOfBoxes); i++) {
-        for (let j = (+boxKeyObject.long - +noOfBoxes); j <= (+boxKeyObject.long + +noOfBoxes); j++) {
-            let lat = i;
-            let long = j;
-
-            let box = i + "," + j;
-            dynamoDBService.retrievePromos(date, box).then(function (data) {
-                // console.log("Box-Keyss",i, j);
-                console.log(data);
-                for (let i = 0; i < data.Items.length; i++) {
+const getPromotions = (latMin, latMax, longMin, longMax, date) => 
+    Promise.all(_.flatten(_.range(latMin, latMax)
+            .map(lat => _.range(longMin, longMax)
+                .map(long => `${lat},${long}`)))
+        .map(boxKey => 
+            dynamoDBService.retrievePromos(date, boxKey)
+                .then(data => data.Items)
+                .then(items => Promise.all(
                     
-                    let promoId = data.Items[i].promoId
-                    // console.log("Third", promos);
-                    let vendorId = data.Items[i].vendorId;
-                    dynamoDBService.getVendor(vendorId).then(function (vendorData) {
-                        //your logic goes here
-                        console.log("First", vendorData.Items[0].name);
-                        promos[promoId] = {
-                            title: data.Items[i].title,
-                            description: data.Items[i].description,
-                            startDate: data.Items[i].startDate,
-                            endDate: data.Items[i].endDate,
-                            startTime: data.Items[i].startTime,
-                            endTime: data.Items[i].endTime,
-                            vendorId: data.Items[i].vendorId,
-                            businessType: data.Items[i].businessType,
-                            discount: data.Items[i].discount,
-                            imgs: data.Items[i].imgUrls,
-                            offerType: data.Items[i].offerType,
-                            terms: data.Items[i].termsNConditions,
-                            selectedDays: data.Items[i].selectedDays,
-                            unitPrice: data.Items[i].unitPrice,
-                            latNLong: data.Items[i].latNLong,
-                            address: data.Items[i].address,
-                            vendorName: vendorData.Items[0].name
-                        }
-
-                        callback(null, {
-                            "isBase64Encoded": true,
-                            "statusCode": 200,
-                            "headers": {
-                                "Access-Control-Allow-Origin": "*",
-                                "Access-Control-Allow-Methods": "*"
-                            },
-                            "body": JSON.stringify(promos)
-                        });
-                    }).catch(function (err) {
-                        //handle error
-                        console.log(err);
-                    });
-                }
-                // console.log(promos);
-
-            }).catch(function (err) {
-                callback(null, {
-                    "isBase64Encoded": true,
-                    "statusCode": 502,
-                    "headers": {
-                        "Access-Control-Allow-Origin": "*",
-                        "Access-Control-Allow-Methods": "*"
-                    },
-                    "body": err.message
-                });
-            })
-        }
-    }
-
-    // dynamoDBService.retrievePromos(date).then(function (data) {
-    //     // axios.get()
-    //     // console.log(data);
-
-    //     for (let i = 0; i < data.Items.length; i++) {
-    //         let promos = {};
-    //         let promoId = data.Items[i].promoId
-    //         // console.log("Third", promos);
-    //         let vendorId = data.Items[i].vendorId;
-    //         dynamoDBService.getVendor(vendorId).then(function (vendorData) {
-    //             //your logic goes here
-    //             console.log("First", vendorData.Items[0].name);
-    //             promos[promoId] = {
-    //                 title: data.Items[i].title,
-    //                 description: data.Items[i].description,
-    //                 startDate: data.Items[i].startDate,
-    //                 endDate: data.Items[i].endDate,
-    //                 startTime: data.Items[i].startTime,
-    //                 endTime: data.Items[i].endTime,
-    //                 vendorId: data.Items[i].vendorId,
-    //                 businessType: data.Items[i].businessType,
-    //                 discount: data.Items[i].discount,
-    //                 imgs: data.Items[i].imgUrls,
-    //                 offerType: data.Items[i].offerType,
-    //                 terms: data.Items[i].termsNConditions,
-    //                 selectedDays: data.Items[i].selectedDays,
-    //                 unitPrice: data.Items[i].unitPrice,
-    //                 latNLong: data.Items[i].latNLong,
-    //                 address: data.Items[i].address,
-    //                 vendorName: vendorData.Items[0].name
-    //         }
-
-    //             callback(null, {
-    //                 "isBase64Encoded": true,
-    //                 "statusCode": 200,
-    //                 "headers": {
-    //                     "Access-Control-Allow-Origin": "*",
-    //                     "Access-Control-Allow-Methods": "*"
-    //                 },
-    //                 "body": JSON.stringify(promos)
-    //             });
-    //         }).catch(function (err) {
-    //             //handle error
-    //             console.log(err);
-    //         });
-    //     }
-    //     // console.log(promos);
-
-    // }).catch(function (err) {
-    //     callback(null, {
-    //         "isBase64Encoded": true,
-    //         "statusCode": 502,
-    //         "headers": {
-    //             "Access-Control-Allow-Origin": "*",
-    //             "Access-Control-Allow-Methods": "*"
-    //         },
-    //         "body": err.message
-    //     });
-    // });
-}
+                    items.map(promo => 
+                    dynamoDBService.getVendor(promo.vendorId)
+                        .then(vendor => ({
+                            ...promo,
+                            imgs: promo.imgUrls,
+                            vendorName: vendor.Items[0].name,
+                        }))
+                )))))
+            .then(_.flatten);
 
 function calculateBox(latitude, longitude){
     let latKey = Math.trunc((latitude + 90) * 10);
