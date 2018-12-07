@@ -19,6 +19,7 @@ exports.handler = function (event, context, callback) {
 
 
      authService.validateUser(userUUID, userName, function (response) {
+         
         if (response.error) {
             callback(null, {
                 "isBase64Encoded": true,
@@ -81,7 +82,20 @@ exports.handler = function (event, context, callback) {
    
 }
 
-const getPromotions = (latMin, latMax, longMin, longMax, date) => 
+const getPromotions = (latMin, latMax, longMin, longMax, date) => {
+    dynamoDBService.retrievePromos(date, boxKey)
+                .then(data => data.Items)
+                .then(items => Promise.all(
+                    
+                    items.map(promo => 
+                    dynamoDBService.getVendor(promo.vendorId)
+                        .then(vendor => ({
+                            ...promo,
+                            imgs: promo.imgUrls,
+                            vendorName: vendor.Items[0].name,
+                        }))
+                )))
+            
     Promise.all(_.flatten(_.range(latMin, latMax)
             .map(lat => _.range(longMin, longMax)
                 .map(long => `${lat},${long}`)))
@@ -99,6 +113,8 @@ const getPromotions = (latMin, latMax, longMin, longMax, date) =>
                         }))
                 )))))
             .then(_.flatten);
+
+}
 
 function calculateBox(latitude, longitude){
     let latKey = Math.trunc((latitude + 90) * 10);
