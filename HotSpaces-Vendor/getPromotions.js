@@ -8,7 +8,7 @@ let authService = require('./authService');
 
 exports.handler = function (event, context, callback) {
     console.log(event);
-    let date = moment.unix(Number(event.queryStringParameters.date)).format('YYYY-MM-DD');
+    let date = moment(Number(event.queryStringParameters.date)).format('YYYY-MM-DD');
     console.log(date);
     let userUUID = event.queryStringParameters.uuid;
     let userName = event.queryStringParameters.user;
