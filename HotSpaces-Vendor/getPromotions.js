@@ -12,6 +12,10 @@ exports.handler = function (event, context, callback) {
     console.log(date);
     let userUUID = event.queryStringParameters.uuid;
     let userName = event.queryStringParameters.user;
+    let location = event.queryStringParameters.location;
+    let radius = event.queryStringParameters.radius;
+
+
     
     let location = null;
     let radius = null;
@@ -49,7 +53,9 @@ function getPromotions(date,currentLocation, radius, callback){
 
     let boxRef = calculateBox(currentLocation);
     let noOfBox = getNumberOfBoxes(radius);
-    
+    for (let i = 0; i < noOfBox; i++) {
+        
+    }
     dynamoDBService.retrievePromos(date).then(function (data) {
         // axios.get()
         // console.log(data);
@@ -59,7 +65,7 @@ function getPromotions(date,currentLocation, radius, callback){
             let promoId = data.Items[i].promoId
             // console.log("Third", promos);
             let vendorId = data.Items[i].vendorId;
-            dynamoDBService.getVendor("33cc6431-a133-447d-82f8-40b1529ee2bd").then(function (vendorData) {
+            dynamoDBService.getVendor(vendorId).then(function (vendorData) {
                 //your logic goes here
                 console.log("First", vendorData.Items[0].name);
                 promos[promoId] = {
