@@ -2,9 +2,10 @@ let AWS = require('aws-sdk');
 let dynamoDBService = require('./dynamoDBService');
 
 exports.handler = function(event, context, callback) {
-    console.log(event);
-    body = event.body;
-     let updatedData = {
+    // console.log(event);
+    body = JSON.parse(event.body);
+    console.log(body)
+    let updatedData = {
         promoId: body.promoId,
         vendorId: body.vendorId,
         offerType: body.offerType,
@@ -24,6 +25,8 @@ exports.handler = function(event, context, callback) {
         locationBox: body.locationBox,
         latNLong: body.latNLong
     }
+
+    // console.log(updatedData);
     
     dynamoDBService.updatePromo(updatedData)
         .then(function (data) {
