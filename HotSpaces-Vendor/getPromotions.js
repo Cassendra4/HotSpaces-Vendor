@@ -82,7 +82,7 @@ exports.handler = function (event, context, callback) {
    
 }
 
-const getPromotions = (latMin, latMax, longMin, longMax, date) => {
+function getPromotions (latMin, latMax, longMin, longMax, date){
     dynamoDBService.retrievePromos(date, boxKey)
                 .then(data => data.Items)
                 .then(items => Promise.all(
