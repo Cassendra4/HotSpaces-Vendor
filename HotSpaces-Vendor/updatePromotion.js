@@ -3,28 +3,29 @@ let dynamoDBService = require('./dynamoDBService');
 
 exports.handler = function(event, context, callback) {
     console.log(event);
+    body = event.body;
      let updatedData = {
-        promoId: event.promoId,
-        vendorId: event.vendorId,
-        offerType: event.offerType,
-        discount: event.discount,
-        startDate: event.startDate,
-        endDate: event.endDate,
-        startTime: event.startTime,
-        endTime: event.endTime,
-        selectedDays: event.selectedDays,
-        description: event.description,
-        title: event.title,
-        unitPrice: event.unitPrice,
+        promoId: body.promoId,
+        vendorId: body.vendorId,
+        offerType: body.offerType,
+        discount: body.discount,
+        startDate: body.startDate,
+        endDate: body.endDate,
+        startTime: body.startTime,
+        endTime: body.endTime,
+        selectedDays: body.selectedDays,
+        description: body.description,
+        title: body.title,
+        unitPrice: body.unitPrice,
         // imgUrl: body.imgUrls,
         terms: body.terms,
         businessType: body.businessType,
-        timestamp: timestamp,
+        timestamp: body.timestamp,
         locationBox: body.locationBox,
         latNLong: body.latNLong
     }
     
-    dynamoDBService.updatePromo(promoData)
+    dynamoDBService.updatePromo(updatedData)
         .then(function (data) {
         console.log("Success", data);
             callback(null, {

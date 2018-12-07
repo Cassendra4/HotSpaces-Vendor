@@ -109,13 +109,14 @@ module.exports = {
         }).promise()
     },
 
-    retrievePromos: function (date) {
+    retrievePromos: function (date, box) {
         return ddb.scan({
             TableName: 'HS_Promotions',
             ExpressionAttributeValues: {
-                ':date': date
+                ':date': date,
+                ':box': box
             },
-            FilterExpression: 'startDate <= :date and endDate >= :date'
+            FilterExpression: 'startDate <= :date and endDate >= :date and locationBox = :box'
         }).promise()
     },
 
