@@ -16,7 +16,18 @@ exports.handler = function (event, context, callback) {
     let longitude = event.queryStringParameters.longitude;
     let radius = event.queryStringParameters.radius;
 
-
+    dynamoDBService.retrievePromos(date, boxKey)
+                .then(data => data.Items)
+                .then(items => Promise.all(
+                    
+                    items.map(promo => 
+                    dynamoDBService.getVendor(promo.vendorId)
+                        .then(vendor => ({
+                            ...promo,
+                            imgs: promo.imgUrls,
+                            vendorName: vendor.Items[0].name,
+                        }))
+                )))
 
      authService.validateUser(userUUID, userName, function (response) {
          
@@ -83,18 +94,7 @@ exports.handler = function (event, context, callback) {
 }
 
 function getPromotions (latMin, latMax, longMin, longMax, date){
-    dynamoDBService.retrievePromos(date, boxKey)
-                .then(data => data.Items)
-                .then(items => Promise.all(
-                    
-                    items.map(promo => 
-                    dynamoDBService.getVendor(promo.vendorId)
-                        .then(vendor => ({
-                            ...promo,
-                            imgs: promo.imgUrls,
-                            vendorName: vendor.Items[0].name,
-                        }))
-                )))
+
             
     Promise.all(_.flatten(_.range(latMin, latMax)
             .map(lat => _.range(longMin, longMax)
