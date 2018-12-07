@@ -152,7 +152,6 @@ module.exports = {
                 '#startTime': 'startTime'
             },
             ExpressionAttributeValues: {
-                ':promoId': updatedData.promoId,
                 ':category': updatedData.businessType,
                 ':description': updatedData.description,
                 ':discount': updatedData.discount,
