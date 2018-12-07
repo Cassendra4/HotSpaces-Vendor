@@ -164,7 +164,7 @@ module.exports = {
                 ':startDate': updatedData.startDate,
                 ':startTime': updatedData.startTime
             },
-            UpdateExpression: 'set #category = :category , #description = :category , #discount = :discount , #endDate = :endDate , #endTime = :promoId , #latNLong = :latNLong , #locationBox = :locationBox , #offerType = :offerType , #selectedDays = :selectedDays , #startDate = :startDate , #startTime = :startTime'
+            UpdateExpression: 'set #category = :category , #description = :description , #discount = :discount , #endDate = :endDate , #endTime = :endTime , #latNLong = :latNLong , #locationBox = :locationBox , #offerType = :offerType , #selectedDays = :selectedDays , #startDate = :startDate , #startTime = :startTime'
         }).promise()
     },
 

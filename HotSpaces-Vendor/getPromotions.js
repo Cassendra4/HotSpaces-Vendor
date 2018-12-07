@@ -52,7 +52,19 @@ exports.handler = function (event, context, callback) {
                         },
                         "body": JSON.stringify(promoList)
                     });
-                })
+                }).catch(
+                    err => {
+                        callback(null, {
+                        "isBase64Encoded": true,
+                        "statusCode": 200,
+                        "headers": {
+                            "Access-Control-Allow-Origin": "*",
+                            "Access-Control-Allow-Methods": "*"
+                        },
+                        "body": err.message
+                    });
+                    }
+                )
 
         } else {
             callback(null, {
