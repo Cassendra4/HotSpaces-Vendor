@@ -12,9 +12,9 @@ exports.handler = function (event, context, callback) {
     console.log(date);
     let userUUID = event.queryStringParameters.uuid;
     let userName = event.queryStringParameters.user;
-    let latitude = event.queryStringParameters.latitude;
-    let longitude = event.queryStringParameters.longitude;
-    let radius = event.queryStringParameters.radius;
+    let latitude = Number(event.queryStringParameters.latitude);
+    let longitude = Number(event.queryStringParameters.longitude);
+    let radius = Number(event.queryStringParameters.radius);
 
 
 
