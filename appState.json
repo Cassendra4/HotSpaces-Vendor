@@ -22,7 +22,8 @@
           "507d5999-d6df-45a1-a809-fd4943d3954b",
           "a7f41488-5b3a-43b0-99fe-c0e3dd313f01",
           "8b217d09-dd2c-4080-8822-152637ae20c2",
-          "3fd97c9a-d36d-45cf-bb8d-005324d0a31c"
+          "3fd97c9a-d36d-45cf-bb8d-005324d0a31c",
+          "66fbf3b2-b979-4e9f-86e6-0f3e173fdc5f"
         ],
         "isRemovable": false,
         "filePath": "HotSpaces-Vendor"
@@ -320,15 +321,40 @@
           "timeout": 60,
           "memory": 128
         }
+      },
+      "66fbf3b2-b979-4e9f-86e6-0f3e173fdc5f": {
+        "id": "66fbf3b2-b979-4e9f-86e6-0f3e173fdc5f",
+        "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
+        "name": "s3FileUpload.js",
+        "type": "LAMBDA_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "HotSpaces-Vendor/s3FileUpload.js",
+        "code": "exports.handler = function(event, context, callback) {\n    console.log(\"opbject created\");\n    console.log(event);\n    callback(null, {\"message\": \"Successfully executed\"});\n}",
+        "triggers": [
+          {
+            "resourceName": "s3awsAmplifyHotspaces",
+            "config": {
+              "type": "s3:ObjectCreated:Put",
+              "keyPrefix": "",
+              "keySuffix": ""
+            }
+          }
+        ],
+        "config": {
+          "runtime": "nodejs8.10",
+          "timeout": 60,
+          "memory": 128
+        }
       }
     },
     "deletedFiles": [],
     "rootNode": "93ffce99-7f73-47ff-958a-0d6e790962d6",
     "openFiles": [
-      "1f94f853-5bdb-41ea-afe7-231da7fae32f",
-      "a7f41488-5b3a-43b0-99fe-c0e3dd313f01"
+      "66fbf3b2-b979-4e9f-86e6-0f3e173fdc5f"
     ],
-    "currentFileId": "1f94f853-5bdb-41ea-afe7-231da7fae32f",
+    "currentFileId": "66fbf3b2-b979-4e9f-86e6-0f3e173fdc5f",
     "resources": {
       "ddbHSPromotions": {
         "name": "ddbHSPromotions",
@@ -826,6 +852,18 @@
           "valid": true
         },
         "globallyEditable": false
+      },
+      "s3awsAmplifyHotspaces": {
+        "name": "s3awsAmplifyHotspaces",
+        "type": "S3",
+        "config": {
+          "mode": 1,
+          "bucket": {
+            "region": "us-east-1",
+            "name": "aws-amplify-hotspaces"
+          }
+        },
+        "globallyEditable": false
       }
     },
     "envVariables": [
@@ -883,7 +921,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1544518325114
+    "lastSave": 1544527853730
   },
   "VCS_STATE": {
     "provider": "GitHub",
