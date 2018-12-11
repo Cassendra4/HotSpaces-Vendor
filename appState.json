@@ -331,7 +331,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/s3FileUpload.js",
-        "code": "exports.handler = function(event, context, callback) {\n    console.log(\"opbject created\");\n    console.log(event);\n    callback(null, {\"message\": \"Successfully executed\"});\n}",
+        "code": "let AWS = require('aws-sdk');\nconst s3 = new AWS.S3();\n\nexports.handler = function (event, context, callback) {\n    console.log(\"opbject created\", event.Records[0].s3);\n    s3.listObjects({\n        'Bucket': 'aws-amplify-hotspaces',\n        'MaxKeys': 10,\n        'Prefix': ''\n    }).promise()\n        .then(data => {\n            console.log(data);           // successful response\n        })\n        .catch(err => {\n            console.log(err, err.stack); // an error occurred\n        });\n    console.log(event);\n    callback(null, { \"message\": \"Successfully executed\" });\n}",
         "triggers": [
           {
             "resourceName": "s3awsAmplifyHotspaces",
@@ -921,7 +921,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1544527853730
+    "lastSave": 1544528915943
   },
   "VCS_STATE": {
     "provider": "GitHub",
