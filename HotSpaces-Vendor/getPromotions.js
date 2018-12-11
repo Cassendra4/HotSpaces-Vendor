@@ -9,7 +9,7 @@ let authService = require('./authService');
 exports.handler = function (event, context, callback) {
     // console.log(event);
     let date = moment(Number(event.queryStringParameters.date)).format('YYYY-MM-DD');
-    // console.log(date);
+    console.log(date);
     let userUUID = event.queryStringParameters.uuid;
     let userName = event.queryStringParameters.user;
     let latitude = Number(event.queryStringParameters.latitude);
@@ -33,7 +33,7 @@ exports.handler = function (event, context, callback) {
 
             boxKeyObject = calculateBox(latitude, longitude);
             noOfBoxes = getNumberOfBoxes(radius);
-
+            console.log(boxKeyObject);
             latMin = +boxKeyObject.lat - +noOfBoxes
             latMax = +boxKeyObject.lat + +noOfBoxes
             longMin = +boxKeyObject.long - +noOfBoxes
