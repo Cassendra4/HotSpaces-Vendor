@@ -7,9 +7,9 @@ let _ = require("lodash");
 let authService = require('./authService');
 
 exports.handler = function (event, context, callback) {
-    console.log(event);
+    // console.log(event);
     let date = moment(Number(event.queryStringParameters.date)).format('YYYY-MM-DD');
-    console.log(date);
+    // console.log(date);
     let userUUID = event.queryStringParameters.uuid;
     let userName = event.queryStringParameters.user;
     let latitude = Number(event.queryStringParameters.latitude);
