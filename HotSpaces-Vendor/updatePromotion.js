@@ -6,7 +6,7 @@ exports.handler = function(event, context, callback) {
     body = JSON.parse(event.body);
     console.log(body)
     let updatedData = {
-        promoId: Number(body.promoId),
+        promoId: body.promoId,
         vendorId: body.vendorId,
         offerType: body.offerType,
         discount: body.discount,
@@ -21,7 +21,7 @@ exports.handler = function(event, context, callback) {
         // imgUrl: body.imgUrls,
         terms: body.terms,
         businessType: body.businessType,
-        timestamp: body.timestamp,
+        timestamp: Number(body.timestamp),
         locationBox: body.locationBox,
         latNLong: body.latNLong
     }
