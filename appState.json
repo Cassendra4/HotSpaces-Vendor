@@ -378,7 +378,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/getVendorWithUser.js",
-        "code": "let AWS = require('aws-sdk');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet dynamoDBService = require('./dynamoDBService');\n\n\nexports.handler = function (event, context, callback) {\n\n    let userId = event.queryStringParameters.userId;\n    dynamoDBService.getUser(userId)\n\n        .then(function (data) {\n            //your logic goes here\n            console.log(data);\n        })\n        .catch(function (err) {\n            //handle error\n            console.log(err);\n        });\n\n\n\n\n}",
+        "code": "let AWS = require('aws-sdk');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet dynamoDBService = require('./dynamoDBService');\n\n\nexports.handler = function (event, context, callback) {\n    console.log(event);\n    let userId = event.queryStringParameters.userId;\n    dynamoDBService.getUser(userId)\n\n        .then(function (data) {\n            //your logic goes here\n            console.log(data);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 200,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": JSON.stringify(data)\n            })\n        })\n        .catch(function (err) {\n            //handle error\n            console.log(err);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": err.message\n            })\n        });\n\n\n\n\n}",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -969,7 +969,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1544891146463
+    "lastSave": 1544892136989
   },
   "VCS_STATE": {
     "provider": "GitHub",
