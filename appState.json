@@ -23,7 +23,8 @@
           "a7f41488-5b3a-43b0-99fe-c0e3dd313f01",
           "8b217d09-dd2c-4080-8822-152637ae20c2",
           "3fd97c9a-d36d-45cf-bb8d-005324d0a31c",
-          "66fbf3b2-b979-4e9f-86e6-0f3e173fdc5f"
+          "66fbf3b2-b979-4e9f-86e6-0f3e173fdc5f",
+          "6569bb1e-03dc-44b0-a26e-907f99bdbcfa"
         ],
         "isRemovable": false,
         "filePath": "HotSpaces-Vendor"
@@ -49,7 +50,7 @@
             "id": "cadc76ff-8048-48e3-916e-84e2a04b67cd",
             "name": "readQr",
             "functionId": "98bc0377-64db-471d-a7bf-74451db9bf90",
-            "event": "{\"queryStringParameters\":{\n    \"qr\": \"2262b1117-cb80-4c8f-aa57-a28afaf9c965\"\n}\n}"
+            "event": "{\"queryStringParameters\":{\n    \"qr\": \"06f8d265f-c262-4a24-b626-54f7069af366\"\n}\n}"
           },
           "9a1e5d82-776b-4629-a5b6-44a51bba2b17": {
             "id": "9a1e5d82-776b-4629-a5b6-44a51bba2b17",
@@ -105,7 +106,7 @@
             "id": "920f74c6-4fd9-4e71-86ca-981daf7cfa16",
             "name": "createQR",
             "functionId": "e3525801-37ee-4812-b654-b95f419c079e",
-            "event": "{\"queryStringParameters\":{\n    \"promo\": \"60512a49-93e5-4099-9eca-ac3bb7a78d58\",\n    \"vendor\": \"33cc6431-a133-447d-82f8-40b1529ee2bd\",\n    \"grab\": \"3457657676588\",\n    \"user\": \"cassie\",\n    \"uuid\":\"JFbmO1PZxtUBjtxE3MMYSFzMeKh2\"\n}\n}"
+            "event": "{\"queryStringParameters\":{\n    \"promo\": \"522adfda-9ca2-468d-b679-7469fdd70616\",\n    \"vendor\": \"33cc6431-a133-447d-82f8-40b1529ee2bd\",\n    \"grab\": \"1544881132000\",\n    \"user\": \"cassie\",\n    \"uuid\":\"JFbmO1PZxtUBjtxE3MMYSFzMeKh2\"\n}\n}"
           }
         }
       },
@@ -269,6 +270,14 @@
           "runtime": "nodejs8.10",
           "timeout": 60,
           "memory": 128
+        },
+        "testCases": {
+          "7c2a14c0-580c-43fa-86d8-c1fe4242f71c": {
+            "id": "7c2a14c0-580c-43fa-86d8-c1fe4242f71c",
+            "name": "Unnamed event",
+            "functionId": "507d5999-d6df-45a1-a809-fd4943d3954b",
+            "event": "{\n    \"queryStringParameters\": {\n        \"userId\": \"e9200042-3240-44c2-90fc-33a06956e931\"\n    }\n}"
+          }
         }
       },
       "a7f41488-5b3a-43b0-99fe-c0e3dd313f01": {
@@ -359,14 +368,41 @@
             }
           ]
         }
+      },
+      "6569bb1e-03dc-44b0-a26e-907f99bdbcfa": {
+        "id": "6569bb1e-03dc-44b0-a26e-907f99bdbcfa",
+        "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
+        "name": "getVendorWithUser.js",
+        "type": "LAMBDA_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "HotSpaces-Vendor/getVendorWithUser.js",
+        "code": "let AWS = require('aws-sdk');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet dynamoDBService = require('./dynamoDBService');\n\n\nexports.handler = function (event, context, callback) {\n\n    let userId = event.queryStringParameters.userId;\n    dynamoDBService.getUser(userId)\n\n        .then(function (data) {\n            //your logic goes here\n            console.log(data);\n        })\n        .catch(function (err) {\n            //handle error\n            console.log(err);\n        });\n\n\n\n\n}",
+        "triggers": [],
+        "config": {
+          "runtime": "nodejs8.10",
+          "timeout": 60,
+          "memory": 128
+        },
+        "testCases": {
+          "960c9889-79ed-41fa-b969-83bbacbc86e3": {
+            "id": "960c9889-79ed-41fa-b969-83bbacbc86e3",
+            "name": "Unnamed event",
+            "functionId": "6569bb1e-03dc-44b0-a26e-907f99bdbcfa",
+            "event": "{\n    \"queryStringParameters\": {\n        \"userId\": \"e9200042-3240-44c2-90fc-33a06956e931\"\n    }\n}"
+          }
+        }
       }
     },
     "deletedFiles": [],
     "rootNode": "93ffce99-7f73-47ff-958a-0d6e790962d6",
     "openFiles": [
-      "66fbf3b2-b979-4e9f-86e6-0f3e173fdc5f"
+      "6569bb1e-03dc-44b0-a26e-907f99bdbcfa",
+      "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
+      "0136c15c-311e-415a-ad68-78090bf12541"
     ],
-    "currentFileId": "66fbf3b2-b979-4e9f-86e6-0f3e173fdc5f",
+    "currentFileId": "6569bb1e-03dc-44b0-a26e-907f99bdbcfa",
     "resources": {
       "ddbHSPromotions": {
         "name": "ddbHSPromotions",
@@ -532,7 +568,7 @@
         "type": "DynamoDB",
         "config": {
           "mode": 1,
-          "operation": "query",
+          "operation": "get",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_User",
             "name": "HS_User",
@@ -541,14 +577,14 @@
             "hasSortKey": false,
             "sortKey": "",
             "sortKeyType": "S",
-            "mode": 0
+            "mode": 1
           },
           "parameters": {
-            "TableName": "HS_User",
-            "ExpressionAttributeValues": {
-              ":user_id": "@{userId}"
+            "Key": {
+              "user_id": "@{userId}"
             },
-            "KeyConditionExpression": "user_id = :user_id"
+            "Item": {},
+            "ExpressionAttributeValues": {}
           },
           "validator": {
             "validatableFields": {},
@@ -933,7 +969,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1544530833096
+    "lastSave": 1544891146463
   },
   "VCS_STATE": {
     "provider": "GitHub",
