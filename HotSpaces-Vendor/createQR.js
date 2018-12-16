@@ -46,6 +46,7 @@ exports.handler = function (event, context, callback) {
         dynamoDBService.getPromoWithPromoId(promo).then(function (data) {
         console.log('data 324', data.Items[0]);
     console.log('data 3245', data.Items[0].offerType);
+    
         let qr = {
             "promo": event.promo,
             "vendor": event.vendor,

@@ -193,7 +193,8 @@ module.exports = {
                 'category': qr.type,
                 'offerType': qr.offerType,
                 'user': qr.user,
-                'grabTime': qr.grabTime
+                'grabTime': qr.grabTime,
+                'userName': qr.userName
             }
         }).promise()
     },
