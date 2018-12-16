@@ -52,6 +52,7 @@ exports.handler = function (event, context, callback) {
             "type": parseInt(data.Items[0].category),
             "offerType": parseInt(data.Items[0].offerType),
             "user": event.user,
+            "userName":event.userName,
             "grabTime": event.grab
         };
         console.log('qr', qr);

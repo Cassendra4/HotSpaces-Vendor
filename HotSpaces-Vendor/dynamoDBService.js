@@ -149,8 +149,7 @@ module.exports = {
                 '#offerType': 'offerType',
                 '#selectedDays': 'selectedDays',
                 '#startDate': 'startDate',
-                '#startTime': 'startTime',
-                '#title': 'title'
+                '#startTime': 'startTime'
             },
             ExpressionAttributeValues: {
                 ':category': updatedData.businessType,
@@ -163,10 +162,9 @@ module.exports = {
                 ':offerType': updatedData.offerType,
                 ':selectedDays': updatedData.selectedDays,
                 ':startDate': updatedData.startDate,
-                ':startTime': updatedData.startTime,
-                ':title': updatedData.title
+                ':startTime': updatedData.startTime
             },
-            UpdateExpression: 'set #category = :category , #description = :description , #discount = :discount , #endDate = :endDate , #endTime = :endTime , #latNLong = :latNLong , #locationBox = :locationBox , #offerType = :offerType , #selectedDays = :selectedDays , #startDate = :startDate , #startTime = :startTime, #title = :title'
+            UpdateExpression: 'set #category = :category , #description = :description , #discount = :discount , #endDate = :endDate , #endTime = :endTime , #latNLong = :latNLong , #locationBox = :locationBox , #offerType = :offerType , #selectedDays = :selectedDays , #startDate = :startDate , #startTime = :startTime'
         }).promise()
     },
 

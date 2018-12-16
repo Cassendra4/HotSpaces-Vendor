@@ -7,7 +7,7 @@ let _ = require("lodash");
 let authService = require('./authService');
 
 exports.handler = function (event, context, callback) {
-    // console.log(event);
+    console.log(event);
     let date = moment(Number(event.queryStringParameters.date)).format('YYYY-MM-DD');
     console.log(date);
     let userUUID = event.queryStringParameters.uuid;
@@ -33,7 +33,7 @@ exports.handler = function (event, context, callback) {
 
             boxKeyObject = calculateBox(latitude, longitude);
             noOfBoxes = getNumberOfBoxes(radius);
-            console.log(boxKeyObject);
+
             latMin = +boxKeyObject.lat - +noOfBoxes
             latMax = +boxKeyObject.lat + +noOfBoxes
             longMin = +boxKeyObject.long - +noOfBoxes

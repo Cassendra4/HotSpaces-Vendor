@@ -22,9 +22,7 @@
           "507d5999-d6df-45a1-a809-fd4943d3954b",
           "a7f41488-5b3a-43b0-99fe-c0e3dd313f01",
           "8b217d09-dd2c-4080-8822-152637ae20c2",
-          "3fd97c9a-d36d-45cf-bb8d-005324d0a31c",
-          "66fbf3b2-b979-4e9f-86e6-0f3e173fdc5f",
-          "6569bb1e-03dc-44b0-a26e-907f99bdbcfa"
+          "3fd97c9a-d36d-45cf-bb8d-005324d0a31c"
         ],
         "isRemovable": false,
         "filePath": "HotSpaces-Vendor"
@@ -50,7 +48,7 @@
             "id": "cadc76ff-8048-48e3-916e-84e2a04b67cd",
             "name": "readQr",
             "functionId": "98bc0377-64db-471d-a7bf-74451db9bf90",
-            "event": "{\"queryStringParameters\":{\n    \"qr\": \"06f8d265f-c262-4a24-b626-54f7069af366\"\n}\n}"
+            "event": "{\"queryStringParameters\":{\n    \"qr\": \"2262b1117-cb80-4c8f-aa57-a28afaf9c965\"\n}\n}"
           },
           "9a1e5d82-776b-4629-a5b6-44a51bba2b17": {
             "id": "9a1e5d82-776b-4629-a5b6-44a51bba2b17",
@@ -94,7 +92,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/createQR.js",
-        "code": "let AWS = require('aws-sdk');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet dynamoDBService = require('./dynamoDBService');\nlet authService = require('./authService');\nconst uuidv4 = require('uuid/v4');\n\nexports.handler = function (event, context, callback) {\n\n    console.log(\"event\", event.queryStringParameters);\n    let promo = {\n        promo: event.queryStringParameters.promo,\n        vendor: event.queryStringParameters.vendor\n    };\n\n    let userUUID = event.queryStringParameters.uuid;\n    let userName = event.queryStringParameters.user;\n    \n     authService.validateUser(userUUID, userName, function (response) {\n        if (response.error) {\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": JSON.stringify(response.error)\n            });\n        } else if (response.validated) {\n           createQR(event.queryStringParameters,promo, callback);\n        } else {\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 403,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": \"User validation failed.\"\n            });\n        }\n    });\n\n}\n    function createQR(event, promo, callback) {\n        dynamoDBService.getPromoWithPromoId(promo).then(function (data) {\n        console.log('data 324', data.Items[0]);\n    console.log('data 3245', data.Items[0].offerType);\n        let qr = {\n            \"promo\": event.promo,\n            \"vendor\": event.vendor,\n            \"type\": parseInt(data.Items[0].category),\n            \"offerType\": parseInt(data.Items[0].offerType),\n            \"user\": event.user,\n            \"grabTime\": event.grab\n        };\n        console.log('qr', qr);\n        var uuid = uuidv4();\n        console.log('uuid', uuid);\n        var uuid = parseInt(data.Items[0].offerType) + uuid;\n        console.log('loggg', uuid);\n        dynamoDBService.addToQR(qr, uuid).then(function (data) {\n            let response = {\n                \"statusCode\": 200,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": JSON.stringify(uuid),\n                \"isBase64Encoded\": false\n            };\n            callback(null, response);\n        }).catch(function (err) {\n            console.log('eerrr', err);\n            let response = {\n                \"statusCode\": 403,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": err,\n                \"isBase64Encoded\": false\n            };\n            callback(null, response);\n        });\n\n\n    }).catch(function (err) {\n         console.log('eerrr12', err);\n        let response = {\n            \"statusCode\": 403,\n            \"headers\": {\n                \"Access-Control-Allow-Origin\": \"*\",\n                \"Access-Control-Allow-Methods\": \"*\"\n            },\n            \"body\": err,\n            \"isBase64Encoded\": false\n        };\n        callback(null, response);\n    });\n    }",
+        "code": "let AWS = require('aws-sdk');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet dynamoDBService = require('./dynamoDBService');\nlet authService = require('./authService');\nconst uuidv4 = require('uuid/v4');\n\nexports.handler = function (event, context, callback) {\n\n    console.log(\"event\", event.queryStringParameters);\n    let promo = {\n        promo: event.queryStringParameters.promo,\n        vendor: event.queryStringParameters.vendor\n    };\n\n    let userUUID = event.queryStringParameters.uuid;\n    let userName = event.queryStringParameters.user;\n    \n     authService.validateUser(userUUID, userName, function (response) {\n        if (response.error) {\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": JSON.stringify(response.error)\n            });\n        } else if (response.validated) {\n           createQR(event.queryStringParameters,promo, callback);\n        } else {\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 403,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": \"User validation failed.\"\n            });\n        }\n    });\n\n}\n    function createQR(event, promo, callback) {\n        dynamoDBService.getPromoWithPromoId(promo).then(function (data) {\n        console.log('data 324', data.Items[0]);\n    console.log('data 3245', data.Items[0].offerType);\n        let qr = {\n            \"promo\": event.promo,\n            \"vendor\": event.vendor,\n            \"type\": parseInt(data.Items[0].category),\n            \"offerType\": parseInt(data.Items[0].offerType),\n            \"user\": event.user,\n            \"userName\":event.userName,\n            \"grabTime\": event.grab\n        };\n        console.log('qr', qr);\n        var uuid = uuidv4();\n        console.log('uuid', uuid);\n        var uuid = parseInt(data.Items[0].offerType) + uuid;\n        console.log('loggg', uuid);\n        dynamoDBService.addToQR(qr, uuid).then(function (data) {\n            let response = {\n                \"statusCode\": 200,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": JSON.stringify(uuid),\n                \"isBase64Encoded\": false\n            };\n            callback(null, response);\n        }).catch(function (err) {\n            console.log('eerrr', err);\n            let response = {\n                \"statusCode\": 403,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": err,\n                \"isBase64Encoded\": false\n            };\n            callback(null, response);\n        });\n\n\n    }).catch(function (err) {\n         console.log('eerrr12', err);\n        let response = {\n            \"statusCode\": 403,\n            \"headers\": {\n                \"Access-Control-Allow-Origin\": \"*\",\n                \"Access-Control-Allow-Methods\": \"*\"\n            },\n            \"body\": err,\n            \"isBase64Encoded\": false\n        };\n        callback(null, response);\n    });\n    }",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -106,7 +104,7 @@
             "id": "920f74c6-4fd9-4e71-86ca-981daf7cfa16",
             "name": "createQR",
             "functionId": "e3525801-37ee-4812-b654-b95f419c079e",
-            "event": "{\"queryStringParameters\":{\n    \"promo\": \"522adfda-9ca2-468d-b679-7469fdd70616\",\n    \"vendor\": \"33cc6431-a133-447d-82f8-40b1529ee2bd\",\n    \"grab\": \"1544881132000\",\n    \"user\": \"cassie\",\n    \"uuid\":\"JFbmO1PZxtUBjtxE3MMYSFzMeKh2\"\n}\n}"
+            "event": "{\"queryStringParameters\":{\n    \"promo\": \"7a1740fd-2185-4da7-91d1-270a168804d5\",\n    \"vendor\": \"33cc6431-a133-447d-82f8-40b1529ee2bd\",\n    \"grab\": \"1544440624416\",\n    \"user\": \"cassie\",\n    \"uuid\":\"JFbmO1PZxtUBjtxE3MMYSFzMeKh2\"\n}\n}"
           }
         }
       },
@@ -186,7 +184,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/updatePromotion.js",
-        "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\n\nexports.handler = function(event, context, callback) {\n    // console.log(event);\n    body = JSON.parse(event.body);\n    console.log(body)\n    let updatedData = {\n        promoId: body.promoId,\n        vendorId: body.vendorId,\n        offerType: body.offerType,\n        discount: body.discount,\n        startDate: body.startDate,\n        endDate: body.endDate,\n        startTime: body.startTime,\n        endTime: body.endTime,\n        selectedDays: body.selectedDays,\n        description: body.description,\n        title: body.title,\n        unitPrice: body.unitPrice,\n        // imgUrl: body.imgUrls,\n        terms: body.terms,\n        businessType: body.businessType,\n        timestamp: Number(body.timestamp),\n        locationBox: body.locationBox,\n        latNLong: body.latNLong\n    }\n\n    // console.log(updatedData);\n    \n    dynamoDBService.updatePromo(updatedData)\n        .then(function (data) {\n        console.log(\"Success\", data);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 200,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": JSON.stringify(updatedData)\n            });\n        }).catch(function (err) {\n            console.log(\"Error\", err);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": err.message\n            });\n        });\n\n\n}",
+        "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\n\nexports.handler = function(event, context, callback) {\n    // console.log(event);\n    body = JSON.parse(event.body);\n    console.log(body)\n    let updatedData = {\n        promoId: Number(body.promoId),\n        vendorId: body.vendorId,\n        offerType: body.offerType,\n        discount: body.discount,\n        startDate: body.startDate,\n        endDate: body.endDate,\n        startTime: body.startTime,\n        endTime: body.endTime,\n        selectedDays: body.selectedDays,\n        description: body.description,\n        title: body.title,\n        unitPrice: body.unitPrice,\n        // imgUrl: body.imgUrls,\n        terms: body.terms,\n        businessType: body.businessType,\n        timestamp: body.timestamp,\n        locationBox: body.locationBox,\n        latNLong: body.latNLong\n    }\n\n    // console.log(updatedData);\n    \n    dynamoDBService.updatePromo(updatedData)\n        .then(function (data) {\n        console.log(\"Success\", data);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 200,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": JSON.stringify(updatedData)\n            });\n        }).catch(function (err) {\n            console.log(\"Error\", err);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": err.message\n            });\n        });\n\n\n}",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -203,7 +201,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/dynamoDBService.js",
-        "code": "let AWS = require('aws-sdk');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nconst uuidv4 = require('uuid/v4');\n\nmodule.exports = {\n\n    getUser: function (userId) {\n        return ddb.query({\n            TableName: 'HS_User',\n            ExpressionAttributeValues: {\n                ':user_id': userId\n            },\n            KeyConditionExpression: 'user_id = :user_id'\n        }).promise()\n\n    },\n\n    /*\n     userData={\n         name : string,\n         role : string,\n         vender_id : string\n     }\n     */\n    addUser: function (userData) {\n        let userId = userData.uid;\n        let name = userData.name;\n        let role = userData.role;\n        let vendor_id = userData.vendor_id;\n        return ddb.put({\n            TableName: 'HS_User',\n            Item: {\n                'user_id': userId,\n                'name': name,\n                'role': role,\n                'vendor_id': vendor_id\n            }\n        }).promise();\n    },\n\n    /*\n     userData={\n         name : string\n     }\n     */\n    addVendor: function (vendorData) {\n        let vendorId = uuidv4();\n        let name = vendorData.name;\n        return ddb.put({\n            TableName: 'HS_Vendor',\n            Item: {\n                'vendor_id': vendorId,\n                'name': name\n            }\n        }).promise();\n    },\n\n    getVendors: function () {\n        return ddb.scan({\n            TableName: 'HS_Vendor'\n        }).promise();\n    },\n\n    getVendor: function (vendorId) {\n        return ddb.query({\n            TableName: 'HS_Vendor',\n            ExpressionAttributeValues: {\n                ':vendor_id': vendorId\n            },\n            KeyConditionExpression: 'vendor_id = :vendor_id'\n        }).promise()\n    },\n\n    addPromo: function (promoData) {\n        console.log('promoData', promoData);\n        return ddb.put({\n            TableName: 'HS_Promotions',\n            Item: {\n                'promoId': promoData.promoId,\n                'vendorId': promoData.vendorId,\n                'termsNConditions': promoData.terms,\n                'offerType': promoData.offerType,\n                'startDate': promoData.startDate,\n                'endDate': promoData.endDate,\n                'startTime': promoData.startTime,\n                'endTime': promoData.endTime,\n                'selectedDays': promoData.selectedDays,\n                'description': promoData.description,\n                'unitPrice': promoData.unitPrice,\n                'title': promoData.title,\n                'imgUrls': promoData.imgUrl,\n                'discount': promoData.discount,\n                'category': promoData.businessType,\n                'timestamp': promoData.timestamp,\n                'locationBox': promoData.locationBox,\n                'latNLong': promoData.latNLong,\n                'address': promoData.address\n            }\n        }).promise()\n    },\n\n    deletePromo: function (promoData) {\n        return ddb.delete({\n            TableName: 'HS_Promotions',\n            Key: {\n                'promoId': promoData.promoID,\n                'timestamp': promoData.timestamp\n            }\n        }).promise()\n    },\n\n    retrievePromos: function (date, box) {\n        return ddb.scan({\n            TableName: 'HS_Promotions',\n            ExpressionAttributeValues: {\n                ':date': date,\n                ':box': box\n            },\n            FilterExpression: 'startDate <= :date and endDate >= :date and locationBox = :box'\n        }).promise()\n    },\n\n    getPromo: function (vendor) {\n        return ddb.scan({\n            TableName: 'HS_Promotions',\n            ExpressionAttributeValues: {\n                ':vendor': vendor\n            },\n            FilterExpression: 'vendorId = :vendor'\n        }).promise();\n    },\n\n    updatePromo: function (updatedData) {\n        console.log(updatedData);\n        return ddb.update({\n            TableName: 'HS_Promotions',\n            Key: {\n                'promoId': updatedData.promoId,\n                'timestamp': updatedData.timestamp\n            },\n            ExpressionAttributeNames: {\n                '#category': 'category',\n                '#description': 'description',\n                '#discount': 'discount',\n                '#endDate': 'endDate',\n                '#endTime': 'endTime',\n                '#latNLong': 'latNLong',\n                '#locationBox': 'locationBox',\n                '#offerType': 'offerType',\n                '#selectedDays': 'selectedDays',\n                '#startDate': 'startDate',\n                '#startTime': 'startTime',\n                '#title': 'title'\n            },\n            ExpressionAttributeValues: {\n                ':category': updatedData.businessType,\n                ':description': updatedData.description,\n                ':discount': updatedData.discount,\n                ':endDate': updatedData.endDate,\n                ':endTime': updatedData.endTime,\n                ':latNLong': updatedData.latNLong,\n                ':locationBox': updatedData.locationBox,\n                ':offerType': updatedData.offerType,\n                ':selectedDays': updatedData.selectedDays,\n                ':startDate': updatedData.startDate,\n                ':startTime': updatedData.startTime,\n                ':title': updatedData.title\n            },\n            UpdateExpression: 'set #category = :category , #description = :description , #discount = :discount , #endDate = :endDate , #endTime = :endTime , #latNLong = :latNLong , #locationBox = :locationBox , #offerType = :offerType , #selectedDays = :selectedDays , #startDate = :startDate , #startTime = :startTime, #title = :title'\n        }).promise()\n    },\n\n    getPromoWithPromoId: function (data) {\n        console.log('data', data);\n        return ddb.query({\n            TableName: 'HS_Promotions',\n            ExpressionAttributeValues: {\n                ':promo': data.promo,\n                ':vendor': data.vendor\n            },\n            KeyConditionExpression: 'promoId = :promo',\n            FilterExpression: 'vendorId = :vendor'\n        }).promise()\n    },\n\n    addToQR: function (qr, uuid) {\n        console.log('qr', qr);\n        console.log('uuid', uuid);\n        return ddb.put({\n            TableName: 'HS_QR',\n            Item: {\n                'vendorId': qr.vendor,\n                'promoId': qr.promo,\n                'QRId': uuid,\n                'category': qr.type,\n                'offerType': qr.offerType,\n                'user': qr.user,\n                'grabTime': qr.grabTime\n            }\n        }).promise()\n    },\n\n    getQR: function (qr) {\n        return ddb.get({\n            TableName: 'HS_QR',\n            Key: {\n                'QRId': qr\n            }\n        }).promise()\n    },\n\n    scanRedeem: function (data) {\n        console.log('data', data);\n        return ddb.scan({\n            TableName: 'HS_Redeem',\n            ExpressionAttributeValues: {\n                ':promo': data.promo,\n                ':user': data.userId\n            },\n            FilterExpression: 'promoId = :promo and userId = :user'\n        }).promise()\n    },\n\n    putRedeem: function (data) {\n        return ddb.put({\n            TableName: 'HS_Redeem',\n            Item: {\n                'promoId': data.promoId,\n                'userId': data.userId,\n                'redeemId': data.redeemId,\n                'noOfRedeems': data.noOfRedeems\n            }\n        }).promise()\n    },\n\n    updateRedeem: function (data) {\n        return ddb.update({\n            TableName: 'HS_Redeem',\n            Key: {\n                'redeemId': data.redeemId\n            },\n            ExpressionAttributeValues: {\n                ':redeem': data.val\n            },\n            UpdateExpression: 'set noOfRedeems = :redeem'\n        }).promise()\n    }\n\n}",
+        "code": "let AWS = require('aws-sdk');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nconst uuidv4 = require('uuid/v4');\n\nmodule.exports = {\n\n    getUser: function (userId) {\n        return ddb.query({\n            TableName: 'HS_User',\n            ExpressionAttributeValues: {\n                ':user_id': userId\n            },\n            KeyConditionExpression: 'user_id = :user_id'\n        }).promise()\n\n    },\n\n    /*\n     userData={\n         name : string,\n         role : string,\n         vender_id : string\n     }\n     */\n    addUser: function (userData) {\n        let userId = userData.uid;\n        let name = userData.name;\n        let role = userData.role;\n        let vendor_id = userData.vendor_id;\n        return ddb.put({\n            TableName: 'HS_User',\n            Item: {\n                'user_id': userId,\n                'name': name,\n                'role': role,\n                'vendor_id': vendor_id\n            }\n        }).promise();\n    },\n\n    /*\n     userData={\n         name : string\n     }\n     */\n    addVendor: function (vendorData) {\n        let vendorId = uuidv4();\n        let name = vendorData.name;\n        return ddb.put({\n            TableName: 'HS_Vendor',\n            Item: {\n                'vendor_id': vendorId,\n                'name': name\n            }\n        }).promise();\n    },\n\n    getVendors: function () {\n        return ddb.scan({\n            TableName: 'HS_Vendor'\n        }).promise();\n    },\n\n    getVendor: function (vendorId) {\n        return ddb.query({\n            TableName: 'HS_Vendor',\n            ExpressionAttributeValues: {\n                ':vendor_id': vendorId\n            },\n            KeyConditionExpression: 'vendor_id = :vendor_id'\n        }).promise()\n    },\n\n    addPromo: function (promoData) {\n        console.log('promoData', promoData);\n        return ddb.put({\n            TableName: 'HS_Promotions',\n            Item: {\n                'promoId': promoData.promoId,\n                'vendorId': promoData.vendorId,\n                'termsNConditions': promoData.terms,\n                'offerType': promoData.offerType,\n                'startDate': promoData.startDate,\n                'endDate': promoData.endDate,\n                'startTime': promoData.startTime,\n                'endTime': promoData.endTime,\n                'selectedDays': promoData.selectedDays,\n                'description': promoData.description,\n                'unitPrice': promoData.unitPrice,\n                'title': promoData.title,\n                'imgUrls': promoData.imgUrl,\n                'discount': promoData.discount,\n                'category': promoData.businessType,\n                'timestamp': promoData.timestamp,\n                'locationBox': promoData.locationBox,\n                'latNLong': promoData.latNLong,\n                'address': promoData.address\n            }\n        }).promise()\n    },\n\n    deletePromo: function (promoData) {\n        return ddb.delete({\n            TableName: 'HS_Promotions',\n            Key: {\n                'promoId': promoData.promoID,\n                'timestamp': promoData.timestamp\n            }\n        }).promise()\n    },\n\n    retrievePromos: function (date, box) {\n        return ddb.scan({\n            TableName: 'HS_Promotions',\n            ExpressionAttributeValues: {\n                ':date': date,\n                ':box': box\n            },\n            FilterExpression: 'startDate <= :date and endDate >= :date and locationBox = :box'\n        }).promise()\n    },\n\n    getPromo: function (vendor) {\n        return ddb.scan({\n            TableName: 'HS_Promotions',\n            ExpressionAttributeValues: {\n                ':vendor': vendor\n            },\n            FilterExpression: 'vendorId = :vendor'\n        }).promise();\n    },\n\n    updatePromo: function (updatedData) {\n        console.log(updatedData);\n        return ddb.update({\n            TableName: 'HS_Promotions',\n            Key: {\n                'promoId': updatedData.promoId,\n                'timestamp': updatedData.timestamp\n            },\n            ExpressionAttributeNames: {\n                '#category': 'category',\n                '#description': 'description',\n                '#discount': 'discount',\n                '#endDate': 'endDate',\n                '#endTime': 'endTime',\n                '#latNLong': 'latNLong',\n                '#locationBox': 'locationBox',\n                '#offerType': 'offerType',\n                '#selectedDays': 'selectedDays',\n                '#startDate': 'startDate',\n                '#startTime': 'startTime'\n            },\n            ExpressionAttributeValues: {\n                ':category': updatedData.businessType,\n                ':description': updatedData.description,\n                ':discount': updatedData.discount,\n                ':endDate': updatedData.endDate,\n                ':endTime': updatedData.endTime,\n                ':latNLong': updatedData.latNLong,\n                ':locationBox': updatedData.locationBox,\n                ':offerType': updatedData.offerType,\n                ':selectedDays': updatedData.selectedDays,\n                ':startDate': updatedData.startDate,\n                ':startTime': updatedData.startTime\n            },\n            UpdateExpression: 'set #category = :category , #description = :description , #discount = :discount , #endDate = :endDate , #endTime = :endTime , #latNLong = :latNLong , #locationBox = :locationBox , #offerType = :offerType , #selectedDays = :selectedDays , #startDate = :startDate , #startTime = :startTime'\n        }).promise()\n    },\n\n    getPromoWithPromoId: function (data) {\n        console.log('data', data);\n        return ddb.query({\n            TableName: 'HS_Promotions',\n            ExpressionAttributeValues: {\n                ':promo': data.promo,\n                ':vendor': data.vendor\n            },\n            KeyConditionExpression: 'promoId = :promo',\n            FilterExpression: 'vendorId = :vendor'\n        }).promise()\n    },\n\n    addToQR: function (qr, uuid) {\n        console.log('qr', qr);\n        console.log('uuid', uuid);\n        return ddb.put({\n            TableName: 'HS_QR',\n            Item: {\n                'vendorId': qr.vendor,\n                'promoId': qr.promo,\n                'QRId': uuid,\n                'category': qr.type,\n                'offerType': qr.offerType,\n                'user': qr.user,\n                'grabTime': qr.grabTime\n            }\n        }).promise()\n    },\n\n    getQR: function (qr) {\n        return ddb.get({\n            TableName: 'HS_QR',\n            Key: {\n                'QRId': qr\n            }\n        }).promise()\n    },\n\n    scanRedeem: function (data) {\n        console.log('data', data);\n        return ddb.scan({\n            TableName: 'HS_Redeem',\n            ExpressionAttributeValues: {\n                ':promo': data.promo,\n                ':user': data.userId\n            },\n            FilterExpression: 'promoId = :promo and userId = :user'\n        }).promise()\n    },\n\n    putRedeem: function (data) {\n        return ddb.put({\n            TableName: 'HS_Redeem',\n            Item: {\n                'promoId': data.promoId,\n                'userId': data.userId,\n                'redeemId': data.redeemId,\n                'noOfRedeems': data.noOfRedeems\n            }\n        }).promise()\n    },\n\n    updateRedeem: function (data) {\n        return ddb.update({\n            TableName: 'HS_Redeem',\n            Key: {\n                'redeemId': data.redeemId\n            },\n            ExpressionAttributeValues: {\n                ':redeem': data.val\n            },\n            UpdateExpression: 'set noOfRedeems = :redeem'\n        }).promise()\n    }\n\n}",
         "triggers": []
       },
       "1f94f853-5bdb-41ea-afe7-231da7fae32f": {
@@ -215,7 +213,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/getPromotions.js",
-        "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet moment = require('moment');\nlet axios = require('axios');\nlet _ = require(\"lodash\");\nlet authService = require('./authService');\n\nexports.handler = function (event, context, callback) {\n    // console.log(event);\n    let date = moment(Number(event.queryStringParameters.date)).format('YYYY-MM-DD');\n    console.log(date);\n    let userUUID = event.queryStringParameters.uuid;\n    let userName = event.queryStringParameters.user;\n    let latitude = Number(event.queryStringParameters.latitude);\n    let longitude = Number(event.queryStringParameters.longitude);\n    let radius = Number(event.queryStringParameters.radius);\n\n\n\n     authService.validateUser(userUUID, userName, function (response) {\n        if (response.error) {\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": JSON.stringify(response.error)\n            });\n        } else if (response.validated) {\n\n            boxKeyObject = calculateBox(latitude, longitude);\n            noOfBoxes = getNumberOfBoxes(radius);\n            console.log(boxKeyObject);\n            latMin = +boxKeyObject.lat - +noOfBoxes\n            latMax = +boxKeyObject.lat + +noOfBoxes\n            longMin = +boxKeyObject.long - +noOfBoxes\n            longMax = +boxKeyObject.long + +noOfBoxes\n\n            getPromotions(latMin, latMax, longMin, longMax, date)\n                .then(data => {\n                    console.log(\"%%%%\", data);\n                    let promoList = data;\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 200,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": JSON.stringify(promoList)\n                    });\n                }).catch(\n                    err => {\n                        callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 200,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": err.message\n                    });\n                    }\n                )\n\n        } else {\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 403,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": \"User validation failed.\"\n            });\n        }\n    });\n   \n}\n\nconst getPromotions = (latMin, latMax, longMin, longMax, date) => \n    Promise.all(_.flatten(_.range(latMin, latMax)\n            .map(lat => _.range(longMin, longMax)\n                .map(long => `${lat},${long}`)))\n        .map(boxKey => \n            dynamoDBService.retrievePromos(date, boxKey)\n                .then(data => data.Items)\n                .then(items => Promise.all(\n                    \n                    items.map(promo => \n                    dynamoDBService.getVendor(promo.vendorId)\n                        .then(vendor => ({\n                            ...promo,\n                            imgs: promo.imgUrls,\n                            vendorName: vendor.Items[0].name,\n                        }))\n                )))))\n            .then(_.flatten);\n\nfunction calculateBox(latitude, longitude){\n    let latKey = Math.trunc((latitude + 90) * 10);\n        let longKey = Math.trunc((longitude + 180) * 10);\n        return {lat: latKey, long: longKey};\n}\n\nfunction getNumberOfBoxes(radiusInMeters){\n        let numberOfBoxes = Math.ceil(radiusInMeters / 10000);\n        return numberOfBoxes;\n}\n\n",
+        "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet moment = require('moment');\nlet axios = require('axios');\nlet _ = require(\"lodash\");\nlet authService = require('./authService');\n\nexports.handler = function (event, context, callback) {\n    console.log(event);\n    let date = moment(Number(event.queryStringParameters.date)).format('YYYY-MM-DD');\n    console.log(date);\n    let userUUID = event.queryStringParameters.uuid;\n    let userName = event.queryStringParameters.user;\n    let latitude = Number(event.queryStringParameters.latitude);\n    let longitude = Number(event.queryStringParameters.longitude);\n    let radius = Number(event.queryStringParameters.radius);\n\n\n\n     authService.validateUser(userUUID, userName, function (response) {\n        if (response.error) {\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": JSON.stringify(response.error)\n            });\n        } else if (response.validated) {\n\n            boxKeyObject = calculateBox(latitude, longitude);\n            noOfBoxes = getNumberOfBoxes(radius);\n\n            latMin = +boxKeyObject.lat - +noOfBoxes\n            latMax = +boxKeyObject.lat + +noOfBoxes\n            longMin = +boxKeyObject.long - +noOfBoxes\n            longMax = +boxKeyObject.long + +noOfBoxes\n\n            getPromotions(latMin, latMax, longMin, longMax, date)\n                .then(data => {\n                    console.log(\"%%%%\", data);\n                    let promoList = data;\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 200,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": JSON.stringify(promoList)\n                    });\n                }).catch(\n                    err => {\n                        callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 200,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": err.message\n                    });\n                    }\n                )\n\n        } else {\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 403,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": \"User validation failed.\"\n            });\n        }\n    });\n   \n}\n\nconst getPromotions = (latMin, latMax, longMin, longMax, date) => \n    Promise.all(_.flatten(_.range(latMin, latMax)\n            .map(lat => _.range(longMin, longMax)\n                .map(long => `${lat},${long}`)))\n        .map(boxKey => \n            dynamoDBService.retrievePromos(date, boxKey)\n                .then(data => data.Items)\n                .then(items => Promise.all(\n                    \n                    items.map(promo => \n                    dynamoDBService.getVendor(promo.vendorId)\n                        .then(vendor => ({\n                            ...promo,\n                            imgs: promo.imgUrls,\n                            vendorName: vendor.Items[0].name,\n                        }))\n                )))))\n            .then(_.flatten);\n\nfunction calculateBox(latitude, longitude){\n    let latKey = Math.trunc((latitude + 90) * 10);\n        let longKey = Math.trunc((longitude + 180) * 10);\n        return {lat: latKey, long: longKey};\n}\n\nfunction getNumberOfBoxes(radiusInMeters){\n        let numberOfBoxes = Math.ceil(radiusInMeters / 10000);\n        return numberOfBoxes;\n}\n\n",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -227,7 +225,7 @@
             "id": "a1c1f5b8-325d-4a2d-8747-c32117f226ba",
             "name": "getPromotions",
             "functionId": "1f94f853-5bdb-41ea-afe7-231da7fae32f",
-            "event": "{\n    \"queryStringParameters\": {\n        \"date\": \"1544518269778\",\n        \"user\": \"cassie\",\n        \"uuid\":\"JFbmO1PZxtUBjtxE3MMYSFzMeKh2\",\n        \"radius\": \"5000\",\n        \"longitude\": \"79.8712028\",\n        \"latitude\": \"6.8259993\"\n    }\n}"
+            "event": "{\n    \"queryStringParameters\": {\n        \"date\": \"1544180904415\",\n        \"user\": \"cassie\",\n        \"uuid\":\"JFbmO1PZxtUBjtxE3MMYSFzMeKh2\",\n        \"radius\": \"5000\",\n        \"longitude\": \"-122.4064\",\n        \"latitude\": \"37.7858\"\n    }\n}"
           }
         }
       },
@@ -270,14 +268,6 @@
           "runtime": "nodejs8.10",
           "timeout": 60,
           "memory": 128
-        },
-        "testCases": {
-          "7c2a14c0-580c-43fa-86d8-c1fe4242f71c": {
-            "id": "7c2a14c0-580c-43fa-86d8-c1fe4242f71c",
-            "name": "Unnamed event",
-            "functionId": "507d5999-d6df-45a1-a809-fd4943d3954b",
-            "event": "{\n    \"queryStringParameters\": {\n        \"userId\": \"e9200042-3240-44c2-90fc-33a06956e931\"\n    }\n}"
-          }
         }
       },
       "a7f41488-5b3a-43b0-99fe-c0e3dd313f01": {
@@ -289,7 +279,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/addUser.js",
-        "code": "let AWS = require('aws-sdk');\nconst cognito_idp = new AWS.CognitoIdentityServiceProvider();\nlet dynamoDBService = require('./dynamoDBService');\nlet utils = require('./utils');\n\nexports.handler = function (event, context, callback) {\n\n    if (utils.authorize(event, callback)) {\n\n        let body = JSON.parse(event.body);\n        let name = body.name;\n        let email = body.email;\n        let phone_number = body.phone_number;\n        let temp_password = body.temp_password;\n        let role = body.role;\n        let vendorId = body.vendor_id;\n\n        cognito_idp.adminCreateUser({\n            UserPoolId: \"us-east-1_mcdTV1jKi\",\n            Username: `${email}`,\n            DesiredDeliveryMediums: [\"EMAIL\", \"SMS\"],\n            ForceAliasCreation: false,\n            TemporaryPassword: `${temp_password}`,\n            UserAttributes: [{\n                Name: \"name\",\n                Value: `${name}`\n            }, {\n                Name: \"email\",\n                Value: `${email}`\n            }, {\n                Name: \"phone_number\",\n                Value: `${phone_number}`\n            }, \n            // {\n            //     Name: \"custom:email_verified\",\n            //     Value: \"true\"\n            // }, {\n            //     Name: \"custom:phone_number_verified\",\n            //     Value: \"true\"\n            // }\n            ],\n            ValidationData: []\n        }, function (error, data) {\n            if (error) {\n                console.log(error);\n                callback(null, {\n                    \"isBase64Encoded\": true,\n                    \"statusCode\": 502,\n                    \"headers\": {\n                        \"Access-Control-Allow-Origin\": \"*\",\n                        \"Access-Control-Allow-Methods\": \"*\"\n                    },\n                    \"body\": error.message\n                });\n            } else {\n                console.log(data);\n                dynamoDBService.addUser({\n                    uid: data.User.Username,\n                    name: name,\n                    role: role,\n                    vendor_id: vendorId\n                }).then(function () {\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 200,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": 'Successfully added vendor with name : ' + name\n                    });\n                }).catch(function (error) {\n                    console.log(error);\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 502,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": 'User added to cognito pool but failed to add to dynamo DB. ' + error.message\n                    });\n                });\n\n            }\n        });\n    }\n}",
+        "code": "let AWS = require('aws-sdk');\nconst cognito_idp = new AWS.CognitoIdentityServiceProvider();\nlet dynamoDBService = require('./dynamoDBService');\nlet utils = require('./utils');\n\nexports.handler = function (event, context, callback) {\n\n    if (utils.authorize(event, callback)) {\n\n        let body = JSON.parse(event.body);\n        let name = body.name;\n        let email = body.email;\n        let phone_number = body.phone_number;\n        let temp_password = body.temp_password;\n        let role = body.role;\n        let vendorId = body.vendor_id;\n\n        cognito_idp.adminCreateUser({\n            UserPoolId: \"us-east-1_mcdTV1jKi\",\n            Username: `${email}`,\n            DesiredDeliveryMediums: [\"EMAIL\", \"SMS\"],\n            ForceAliasCreation: false,\n            TemporaryPassword: `${temp_password}`,\n            UserAttributes: [{\n                Name: \"name\",\n                Value: `${name}`\n            }, {\n                Name: \"email\",\n                Value: `${email}`\n            }, {\n                Name: \"phone_number\",\n                Value: `${phone_number}`\n            }],\n            ValidationData: []\n        }, function (error, data) {\n            if (error) {\n                console.log(error);\n                callback(null, {\n                    \"isBase64Encoded\": true,\n                    \"statusCode\": 502,\n                    \"headers\": {\n                        \"Access-Control-Allow-Origin\": \"*\",\n                        \"Access-Control-Allow-Methods\": \"*\"\n                    },\n                    \"body\": error.message\n                });\n            } else {\n                console.log(data);\n                dynamoDBService.addUser({\n                    uid: data.User.Username,\n                    name: name,\n                    role: role,\n                    vendor_id: vendorId\n                }).then(function () {\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 200,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": 'Successfully added vendor with name : ' + name\n                    });\n                }).catch(function (error) {\n                    console.log(error);\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 502,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": 'User added to cognito pool but failed to add to dynamo DB. ' + error.message\n                    });\n                });\n\n            }\n        });\n    }\n}",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -330,85 +320,26 @@
           "timeout": 60,
           "memory": 128
         }
-      },
-      "66fbf3b2-b979-4e9f-86e6-0f3e173fdc5f": {
-        "id": "66fbf3b2-b979-4e9f-86e6-0f3e173fdc5f",
-        "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
-        "name": "s3FileUpload.js",
-        "type": "LAMBDA_FILE",
-        "isDirectory": false,
-        "children": [],
-        "isRemovable": true,
-        "filePath": "HotSpaces-Vendor/s3FileUpload.js",
-        "code": "let AWS = require('aws-sdk');\nconst s3 = new AWS.S3();\n\nexports.handler = function (event, context, callback) {\n    console.log(\"opbject created\", event.Records[0].s3.object.key);\n    let object = event.Records[0].s3.object.key;\n\n    var params = {\n        AccessControlPolicy: {\n        },\n        Bucket: \"aws-amplify-hotspaces\",\n        ACL: \"public-read\",\n        Key: object\n    };\n\n    s3.putObjectAcl(params, function (err, data) {\n        if (err) console.log(err, err.stack); // an error occurred\n        else console.log(data);           // successful response\n        /*\n        data = {\n        }\n        */\n    });\n\n    callback(null, { \"message\": \"Successfully executed\" });\n}",
-        "triggers": [
-          {
-            "resourceName": "s3awsAmplifyHotspaces",
-            "config": {
-              "type": "s3:ObjectCreated:Put",
-              "keyPrefix": "",
-              "keySuffix": ""
-            }
-          }
-        ],
-        "config": {
-          "runtime": "nodejs8.10",
-          "timeout": 60,
-          "memory": 128
-        },
-        "customSecurityPolicy": {
-          "Version": "2012-10-17",
-          "Statement": [
-            {
-              "Effect": "Allow",
-              "Resource": "arn:aws:s3:::aws-amplify-hotspaces/*",
-              "Action": [
-                "s3:PutObjectAcl"
-              ]
-            }
-          ]
-        }
-      },
-      "6569bb1e-03dc-44b0-a26e-907f99bdbcfa": {
-        "id": "6569bb1e-03dc-44b0-a26e-907f99bdbcfa",
-        "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
-        "name": "getVendorWithUser.js",
-        "type": "LAMBDA_FILE",
-        "isDirectory": false,
-        "children": [],
-        "isRemovable": true,
-        "filePath": "HotSpaces-Vendor/getVendorWithUser.js",
-        "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\n\n\nexports.handler = function (event, context, callback) {\n    console.log(\"aaaaa\",event);\n    let userId = event.queryStringParameters.userId;\n    dynamoDBService.getUser(userId)\n\n        .then(function (data) {\n            //your logic goes here\n            console.log(data);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 200,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": JSON.stringify(data)\n            })\n        })\n        .catch(function (err) {\n            //handle error\n            console.log(err);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": err.message\n            })\n        });\n        \n}",
-        "triggers": [],
-        "config": {
-          "runtime": "nodejs8.10",
-          "timeout": 60,
-          "memory": 128
-        },
-        "testCases": {
-          "960c9889-79ed-41fa-b969-83bbacbc86e3": {
-            "id": "960c9889-79ed-41fa-b969-83bbacbc86e3",
-            "name": "Unnamed event",
-            "functionId": "6569bb1e-03dc-44b0-a26e-907f99bdbcfa",
-            "event": "{\n    \"queryStringParameters\": {\n        \"userId\": \"e9200042-3240-44c2-90fc-33a06956e931\"\n    }\n}"
-          }
-        }
       }
     },
     "deletedFiles": [],
     "rootNode": "93ffce99-7f73-47ff-958a-0d6e790962d6",
     "openFiles": [
       "dac9deff-34fa-46f9-81b9-d82feaf60240",
-      "4ed6d4c5-d54d-482b-b03a-2232e44d86aa"
+      "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
+      "1f94f853-5bdb-41ea-afe7-231da7fae32f",
+      "0136c15c-311e-415a-ad68-78090bf12541",
+      "e3525801-37ee-4812-b654-b95f419c079e",
+      "98bc0377-64db-471d-a7bf-74451db9bf90"
     ],
-    "currentFileId": "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
+    "currentFileId": "e3525801-37ee-4812-b654-b95f419c079e",
     "resources": {
       "ddbHSPromotions": {
         "name": "ddbHSPromotions",
         "type": "DynamoDB",
         "config": {
           "mode": 1,
-          "operation": "update",
+          "operation": "scan",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_Promotions",
             "name": "HS_Promotions",
@@ -421,39 +352,11 @@
           },
           "parameters": {
             "TableName": "HS_Promotions",
-            "Key": {
-              "promoId": "@{updatedData.promoId}",
-              "timestamp": "@{updatedData.timestamp}"
-            },
-            "ExpressionAttributeNames": {
-              "#category": "category",
-              "#description": "description",
-              "#discount": "discount",
-              "#endDate": "endDate",
-              "#endTime": "endTime",
-              "#latNLong": "latNLong",
-              "#locationBox": "locationBox",
-              "#offerType": "offerType",
-              "#selectedDays": "selectedDays",
-              "#startDate": "startDate",
-              "#startTime": "startTime",
-              "#title": "title"
-            },
             "ExpressionAttributeValues": {
-              ":category": "@{updatedData.businessType}",
-              ":description": "@{updatedData.description}",
-              ":discount": "@{updatedData.discount}",
-              ":endDate": "@{updatedData.endDate}",
-              ":endTime": "@{updatedData.endTime}",
-              ":latNLong": "@{updatedData.latNLong}",
-              ":locationBox": "@{updatedData.locationBox}",
-              ":offerType": "@{updatedData.offerType}",
-              ":selectedDays": "@{updatedData.selectedDays}",
-              ":startDate": "@{updatedData.startDate}",
-              ":startTime": "@{updatedData.startTime}",
-              ":title": "@{updatedData.title}"
+              ":date": "@{date}",
+              ":box": "@{box}"
             },
-            "UpdateExpression": "set #category = :category , #description = :description , #discount = :discount , #endDate = :endDate , #endTime = :endTime , #latNLong = :latNLong , #locationBox = :locationBox , #offerType = :offerType , #selectedDays = :selectedDays , #startDate = :startDate , #startTime = :startTime, #title = :title"
+            "FilterExpression": "startDate <= :date and endDate >= :date and locationBox = :box"
           },
           "validator": {
             "validatableFields": {},
@@ -595,7 +498,7 @@
         "type": "DynamoDB",
         "config": {
           "mode": 1,
-          "operation": "get",
+          "operation": "query",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_User",
             "name": "HS_User",
@@ -607,11 +510,11 @@
             "mode": 0
           },
           "parameters": {
-            "Key": {
-              "user_id": "@{userId}"
+            "TableName": "HS_User",
+            "ExpressionAttributeValues": {
+              ":user_id": "@{userId}"
             },
-            "Item": {},
-            "ExpressionAttributeValues": {}
+            "KeyConditionExpression": "user_id = :user_id"
           },
           "validator": {
             "validatableFields": {},
@@ -927,18 +830,6 @@
           "valid": true
         },
         "globallyEditable": false
-      },
-      "s3awsAmplifyHotspaces": {
-        "name": "s3awsAmplifyHotspaces",
-        "type": "S3",
-        "config": {
-          "mode": 1,
-          "bucket": {
-            "region": "us-east-1",
-            "name": "aws-amplify-hotspaces"
-          }
-        },
-        "globallyEditable": false
       }
     },
     "envVariables": [
@@ -996,7 +887,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1544937524219
+    "lastSave": 1544939687853
   },
   "VCS_STATE": {
     "provider": "GitHub",
