@@ -1,10 +1,9 @@
 let AWS = require('aws-sdk');
-const ddb = new AWS.DynamoDB.DocumentClient();
 let dynamoDBService = require('./dynamoDBService');
 
 
 exports.handler = function (event, context, callback) {
-    console.log(event);
+    console.log("aaaaa",event);
     let userId = event.queryStringParameters.userId;
     dynamoDBService.getUser(userId)
 
@@ -34,8 +33,5 @@ exports.handler = function (event, context, callback) {
                 "body": err.message
             })
         });
-
-
-
-
+        
 }
