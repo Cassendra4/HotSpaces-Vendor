@@ -185,7 +185,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/updatePromotion.js",
-        "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\n\nexports.handler = function(event, context, callback) {\n    // console.log(event);\n    body = JSON.parse(event.body);\n    console.log(body)\n    let updatedData = {\n        promoId: Number(body.promoId),\n        vendorId: body.vendorId,\n        offerType: body.offerType,\n        discount: body.discount,\n        startDate: body.startDate,\n        endDate: body.endDate,\n        startTime: body.startTime,\n        endTime: body.endTime,\n        selectedDays: body.selectedDays,\n        description: body.description,\n        title: body.title,\n        unitPrice: body.unitPrice,\n        // imgUrl: body.imgUrls,\n        terms: body.terms,\n        businessType: body.businessType,\n        timestamp: body.timestamp,\n        locationBox: body.locationBox,\n        latNLong: body.latNLong\n    }\n\n    // console.log(updatedData);\n    \n    dynamoDBService.updatePromo(updatedData)\n        .then(function (data) {\n        console.log(\"Success\", data);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 200,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": JSON.stringify(updatedData)\n            });\n        }).catch(function (err) {\n            console.log(\"Error\", err);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": err.message\n            });\n        });\n\n\n}",
+        "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\n\nexports.handler = function(event, context, callback) {\n    // console.log(event);\n    body = JSON.parse(event.body);\n    console.log(body)\n    let updatedData = {\n        promoId: body.promoId,\n        vendorId: body.vendorId,\n        offerType: body.offerType,\n        discount: body.discount,\n        startDate: body.startDate,\n        endDate: body.endDate,\n        startTime: body.startTime,\n        endTime: body.endTime,\n        selectedDays: body.selectedDays,\n        description: body.description,\n        title: body.title,\n        unitPrice: body.unitPrice,\n        // imgUrl: body.imgUrls,\n        terms: body.terms,\n        businessType: body.businessType,\n        timestamp: body.timestamp,\n        locationBox: body.locationBox,\n        latNLong: body.latNLong\n    }\n\n    // console.log(updatedData);\n    \n    dynamoDBService.updatePromo(updatedData)\n        .then(function (data) {\n        console.log(\"Success\", data);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 200,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": JSON.stringify(updatedData)\n            });\n        }).catch(function (err) {\n            console.log(\"Error\", err);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": err.message\n            });\n        });\n\n\n}",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -351,11 +351,9 @@
     "deletedFiles": [],
     "rootNode": "93ffce99-7f73-47ff-958a-0d6e790962d6",
     "openFiles": [
-      "6569bb1e-03dc-44b0-a26e-907f99bdbcfa",
-      "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
-      "a7f41488-5b3a-43b0-99fe-c0e3dd313f01"
+      "dac9deff-34fa-46f9-81b9-d82feaf60240"
     ],
-    "currentFileId": "6569bb1e-03dc-44b0-a26e-907f99bdbcfa",
+    "currentFileId": "dac9deff-34fa-46f9-81b9-d82feaf60240",
     "resources": {
       "ddbHSPromotions": {
         "name": "ddbHSPromotions",
@@ -850,7 +848,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1545026923082
+    "lastSave": 1545037582818
   },
   "VCS_STATE": {
     "provider": "GitHub",
