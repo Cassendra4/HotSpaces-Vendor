@@ -14,7 +14,9 @@ exports.handler = function (event, context, callback) {
             let vendorId = data.Items[0].vendor_id;
             ddb.get({
                 TableName: 'HS_Vendor',
-                Key: { 'vendor_id': vendorId }
+                Key: {
+                    'vendor_id': vendorId
+                }
             }).promise()
                 .then(function (data) {
                     console.log("vendor", data);
