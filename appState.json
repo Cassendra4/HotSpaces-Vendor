@@ -331,7 +331,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/getVendorWithUser.js",
-        "code": "let AWS = require('aws-sdk');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet dynamoDBService = require('./dynamoDBService');\n\n\nexports.handler = function (event, context, callback) {\n    console.log(\"aaaaa\", event);\n    let userData = {};\n    let userId = event.queryStringParameters.userId;\n    dynamoDBService.getUser(userId)\n        .then(function (data) {\n            userData[\"userRole\"] = data.Items[0].role;\n            console.log(data.Items[0].vendor_id);\n            let vendorId = data.Items[0].vendor_id;\n                    })\n        .catch(function (err) {\n            //handle error\n            console.log(err);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": err.message\n            })\n        });\n\n}",
+        "code": "let AWS = require('aws-sdk');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet dynamoDBService = require('./dynamoDBService');\n\n\nexports.handler = function (event, context, callback) {\n    console.log(\"aaaaa\", event);\n    let userData = {};\n    let userId = event.queryStringParameters.userId;\n    dynamoDBService.getUser(userId)\n        .then(function (data) {\n            userData[\"userRole\"] = data.Items[0].role;\n            console.log(data.Items[0].vendor_id);\n            let vendorId = data.Items[0].vendor_id;\n            ddb.get({\n                TableName: 'HS_Vendor',\n                Key: { 'vendor_id': vendorId }\n            }).promise()\n                .then(function (data) {\n                    console.log(\"vendor\", data);\n                    userData[\"vendorName\"] = data.Item.name;\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 200,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": JSON.stringify(userData)\n                    })\n                    // userData[\"\"]\n                    //your logic goes here\n                }).catch(function (err) {\n                    //handle error\n                    console.log(err);\n                });\n        })\n        .catch(function (err) {\n            //handle error\n            console.log(err);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": err.message\n            })\n        });\n\n}",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -430,7 +430,7 @@
         "name": "ddbHSVendor",
         "type": "DynamoDB",
         "config": {
-          "mode": 0,
+          "mode": 1,
           "operation": "get",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_Vendor",
@@ -850,7 +850,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1545025671646
+    "lastSave": 1545026439034
   },
   "VCS_STATE": {
     "provider": "GitHub",
