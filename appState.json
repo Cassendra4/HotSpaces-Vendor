@@ -22,7 +22,8 @@
           "507d5999-d6df-45a1-a809-fd4943d3954b",
           "a7f41488-5b3a-43b0-99fe-c0e3dd313f01",
           "8b217d09-dd2c-4080-8822-152637ae20c2",
-          "3fd97c9a-d36d-45cf-bb8d-005324d0a31c"
+          "3fd97c9a-d36d-45cf-bb8d-005324d0a31c",
+          "6569bb1e-03dc-44b0-a26e-907f99bdbcfa"
         ],
         "isRemovable": false,
         "filePath": "HotSpaces-Vendor"
@@ -320,19 +321,39 @@
           "timeout": 60,
           "memory": 128
         }
+      },
+      "6569bb1e-03dc-44b0-a26e-907f99bdbcfa": {
+        "id": "6569bb1e-03dc-44b0-a26e-907f99bdbcfa",
+        "parent": "93ffce99-7f73-47ff-958a-0d6e790962d6",
+        "name": "getVendorWithUser.js",
+        "type": "LAMBDA_FILE",
+        "isDirectory": false,
+        "children": [],
+        "isRemovable": true,
+        "filePath": "HotSpaces-Vendor/getVendorWithUser.js",
+        "code": "let AWS = require('aws-sdk');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet dynamoDBService = require('./dynamoDBService');\n\n\nexports.handler = function (event, context, callback) {\n    console.log(\"aaaaa\", event);\n    let userData = {};\n    let userId = event.queryStringParameters.userId;\n    dynamoDBService.getUser(userId)\n        .then(function (data) {\n            userData[\"userRole\"] = data.Items[0].role;\n            console.log(data.Items[0].vendor_id);\n            let vendorId = data.Items[0].vendor_id;\n            ddb.get({\n                TableName: 'HS_Vendor',\n                Key: { 'vendor_id': vendorId }\n            }).promise()\n                .then(function (data) {\n                    console.log(\"vendor\", data);\n                    userData[\"vendorName\"] = data.Item.name;\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 200,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": JSON.stringify(userData)\n                    })\n                    // userData[\"\"]\n                    //your logic goes here\n                }).catch(function (err) {\n                    //handle error\n                    console.log(err);\n                });\n        })\n        .catch(function (err) {\n            //handle error\n            console.log(err);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": err.message\n            })\n        });\n\n}",
+        "triggers": [],
+        "config": {
+          "runtime": "nodejs8.10",
+          "timeout": 60,
+          "memory": 128
+        },
+        "testCases": {
+          "960c9889-79ed-41fa-b969-83bbacbc86e3": {
+            "id": "960c9889-79ed-41fa-b969-83bbacbc86e3",
+            "name": "Unnamed event",
+            "functionId": "6569bb1e-03dc-44b0-a26e-907f99bdbcfa",
+            "event": "{\n    \"queryStringParameters\": {\n        \"userId\": \"e9200042-3240-44c2-90fc-33a06956e931\"\n    }\n}"
+          }
+        }
       }
     },
     "deletedFiles": [],
     "rootNode": "93ffce99-7f73-47ff-958a-0d6e790962d6",
     "openFiles": [
-      "dac9deff-34fa-46f9-81b9-d82feaf60240",
-      "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
-      "1f94f853-5bdb-41ea-afe7-231da7fae32f",
-      "0136c15c-311e-415a-ad68-78090bf12541",
-      "e3525801-37ee-4812-b654-b95f419c079e",
-      "98bc0377-64db-471d-a7bf-74451db9bf90"
+      "6569bb1e-03dc-44b0-a26e-907f99bdbcfa"
     ],
-    "currentFileId": "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
+    "currentFileId": "6569bb1e-03dc-44b0-a26e-907f99bdbcfa",
     "resources": {
       "ddbHSPromotions": {
         "name": "ddbHSPromotions",
@@ -888,7 +909,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1544939950926
+    "lastSave": 1545024304342
   },
   "VCS_STATE": {
     "provider": "GitHub",
