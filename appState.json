@@ -331,7 +331,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/getVendorWithUser.js",
-        "code": "let AWS = require('aws-sdk');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet dynamoDBService = require('./dynamoDBService');\n\n\nexports.handler = function (event, context, callback) {\n    console.log(\"aaaaa\", event);\n    let userData = {};\n    let userId = event.queryStringParameters.userId;\n    dynamoDBService.getUser(userId)\n        .then(function (data) {\n            userData[\"userRole\"] = data.Items[0].role;\n            console.log(data.Items[0].vendor_id);\n            let vendorId = data.Items[0].vendor_id;\n            ddb.get({\n                TableName: 'HS_Vendor',\n                Key: {\n                    'vendor_id': vendorId\n                }\n            }).promise()\n                .then(function (data) {\n                    console.log(\"vendor\", data);\n                    userData[\"vendorName\"] = data.Item.name;\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 200,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": JSON.stringify(userData)\n                    })\n                    // userData[\"\"]\n                    //your logic goes here\n                }).catch(function (err) {\n                    //handle error\n                    console.log(err);\n                });\n        })\n        .catch(function (err) {\n            //handle error\n            console.log(err);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": err.message\n            })\n        });\n\n}",
+        "code": "let AWS = require('aws-sdk');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet dynamoDBService = require('./dynamoDBService');\n\n\nexports.handler = function (event, context, callback) {\n    console.log(\"aaaaa\", event);\n    let userData = {};\n    let userId = event.queryStringParameters.userId;\n    dynamoDBService.getUser(userId)\n        .then(function (data) {\n            userData[\"userRole\"] = data.Items[0].role;\n            console.log(data.Items[0].vendor_id);\n            let vendorId = data.Items[0].vendor_id;\n                    })\n        .catch(function (err) {\n            //handle error\n            console.log(err);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": err.message\n            })\n        });\n\n}",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -352,7 +352,8 @@
     "rootNode": "93ffce99-7f73-47ff-958a-0d6e790962d6",
     "openFiles": [
       "6569bb1e-03dc-44b0-a26e-907f99bdbcfa",
-      "4ed6d4c5-d54d-482b-b03a-2232e44d86aa"
+      "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
+      "a7f41488-5b3a-43b0-99fe-c0e3dd313f01"
     ],
     "currentFileId": "6569bb1e-03dc-44b0-a26e-907f99bdbcfa",
     "resources": {
@@ -416,66 +417,6 @@
               "grabTime": "@{qr.grabTime}",
               "userName": "@{qr.userName}"
             }
-          },
-          "validator": {
-            "validatableFields": {},
-            "validity": true
-          },
-          "valid": true
-        },
-        "globallyEditable": false
-      },
-      "ddbHSuser": {
-        "name": "ddbHSuser",
-        "type": "DynamoDB",
-        "config": {
-          "mode": 1,
-          "operation": "put",
-          "table": {
-            "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_user",
-            "name": "HS_user",
-            "partitionKey": "user_id",
-            "partitionKeyType": "S",
-            "hasSortKey": false,
-            "sortKey": "",
-            "sortKeyType": "S",
-            "mode": 0
-          },
-          "parameters": {
-            "TableName": "HS_user",
-            "Item": {
-              "user_id": "@{userId}",
-              "name": "@{name}",
-              "role": "@{role}",
-              "vendor_id": "@{vendor_id}"
-            }
-          },
-          "validator": {
-            "validatableFields": {},
-            "validity": true
-          },
-          "valid": true
-        },
-        "globallyEditable": false
-      },
-      "ddbHSvendor": {
-        "name": "ddbHSvendor",
-        "type": "DynamoDB",
-        "config": {
-          "mode": 0,
-          "operation": "scan",
-          "table": {
-            "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_vendor",
-            "name": "HS_vendor",
-            "partitionKey": "vendor_id",
-            "partitionKeyType": "S",
-            "hasSortKey": false,
-            "sortKey": "",
-            "sortKeyType": "S",
-            "mode": 0
-          },
-          "parameters": {
-            "TableName": "HS_vendor"
           },
           "validator": {
             "validatableFields": {},
@@ -909,7 +850,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1545025272829
+    "lastSave": 1545025671646
   },
   "VCS_STATE": {
     "provider": "GitHub",
