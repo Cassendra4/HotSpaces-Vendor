@@ -245,6 +245,16 @@ module.exports = {
             },
             UpdateExpression: 'set noOfRedeems = :redeem'
         }).promise()
+    },
+
+    getNoOfRedeems: function (promoId) {
+        return ddb.scan({
+            TableName: 'HS_Redeem',
+            ExpressionAttributeValues: {
+                ':promoId': promoId
+            },
+            FilterExpression: 'promoId = :promoId'
+        }).promise()
     }
 
 }
