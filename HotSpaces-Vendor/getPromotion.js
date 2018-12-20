@@ -9,25 +9,25 @@ exports.handler = function (event, context, callback) {
         let promoArray = [];
 
 
-        Promise.all(promoData.map(promo => new Promise(((resolve, reject) =>
-            
+        Promise.all(promoData.map(promo => new Promise(((resolve, reject) => {
             ddb.scan({
                 TableName: 'HS_Redeem',
                 ExpressionAttributeValues: {
-                    ':promoId': promo
+                    ':promoId': promo.promoId
                 },
                 FilterExpression: 'promoId = :promoId'
             }).promise().then(function (data) {
-                console.log(data);
-                resolve(promo["redeems"] = data.Items[0].noOfRedeems)
+                promo["redeems"] = data.Items[0].noOfRedeems;
+                resolve(promoArray.push(promo))
                 //your logic goes here
             }).catch(function (err) {
                 //handle error
                 resolve();
-            })
+            });
+        }
         )))).then(
-            console.log("Promoss###",promoData)
-        ).catch(err => console.log("Error Happend"))
+            console.log("Promoss###", promoArray)
+            ).catch(err => console.log("Error Happend"))
 
         console.log(data);
         callback(null, {
