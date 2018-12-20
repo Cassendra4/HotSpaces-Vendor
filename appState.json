@@ -356,14 +356,14 @@
       "fee713c1-57ce-4563-8763-b5987d956e02",
       "4ed6d4c5-d54d-482b-b03a-2232e44d86aa"
     ],
-    "currentFileId": "fee713c1-57ce-4563-8763-b5987d956e02",
+    "currentFileId": "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
     "resources": {
       "ddbHSPromotions": {
         "name": "ddbHSPromotions",
         "type": "DynamoDB",
         "config": {
           "mode": 1,
-          "operation": "query",
+          "operation": "scan",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_Promotions",
             "name": "HS_Promotions",
@@ -372,15 +372,13 @@
             "hasSortKey": true,
             "sortKey": "timestamp",
             "sortKeyType": "N",
-            "mode": 0
+            "mode": 1
           },
           "parameters": {
             "TableName": "HS_Promotions",
             "ExpressionAttributeValues": {
-              ":promo": "@{data.promo}",
-              ":vendor": "@{data.vendor}"
+              ":vendor": "@{vendor}"
             },
-            "KeyConditionExpression": "promoId = :promo",
             "FilterExpression": "vendorId = :vendor"
           },
           "validator": {
@@ -396,7 +394,7 @@
         "type": "DynamoDB",
         "config": {
           "mode": 1,
-          "operation": "get",
+          "operation": "put",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_QR",
             "name": "HS_QR",
@@ -409,8 +407,15 @@
           },
           "parameters": {
             "TableName": "HS_QR",
-            "Key": {
-              "QRId": "@{qr}"
+            "Item": {
+              "vendorId": "@{qr.vendor}",
+              "promoId": "@{qr.promo}",
+              "QRId": "@{uuid}",
+              "category": "@{qr.type}",
+              "offerType": "@{qr.offerType}",
+              "user": "@{qr.user}",
+              "grabTime": "@{qr.grabTime}",
+              "userName": "@{qr.userName}"
             }
           },
           "validator": {
@@ -426,7 +431,7 @@
         "type": "DynamoDB",
         "config": {
           "mode": 1,
-          "operation": "scan",
+          "operation": "get",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_Vendor",
             "name": "HS_Vendor",
@@ -438,7 +443,10 @@
             "mode": 0
           },
           "parameters": {
-            "TableName": "HS_Vendor"
+            "TableName": "HS_Vendor",
+            "Key": {
+              "vendor_id": "@{vendorId}"
+            }
           },
           "validator": {
             "validatableFields": {},
@@ -453,7 +461,7 @@
         "type": "DynamoDB",
         "config": {
           "mode": 1,
-          "operation": "put",
+          "operation": "query",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_User",
             "name": "HS_User",
@@ -466,12 +474,10 @@
           },
           "parameters": {
             "TableName": "HS_User",
-            "Item": {
-              "user_id": "@{userId}",
-              "name": "@{name}",
-              "role": "@{role}",
-              "vendor_id": "@{vendor_id}"
-            }
+            "ExpressionAttributeValues": {
+              ":user_id": "@{userId}"
+            },
+            "KeyConditionExpression": "user_id = :user_id"
           },
           "validator": {
             "validatableFields": {},
@@ -758,7 +764,7 @@
         "name": "ddbHSRedeem",
         "type": "DynamoDB",
         "config": {
-          "mode": 0,
+          "mode": 1,
           "operation": "scan",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_Redeem",
@@ -773,10 +779,9 @@
           "parameters": {
             "TableName": "HS_Redeem",
             "ExpressionAttributeValues": {
-              ":promo": "@{data.promo}",
-              ":user": "@{data.userId}"
+              ":promoId": "@{promoId}"
             },
-            "FilterExpression": "promoId = :promo and userId = :user"
+            "FilterExpression": "promoId = :"
           },
           "validator": {
             "validatableFields": {},
@@ -842,7 +847,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1545292063927
+    "lastSave": 1545294284694
   },
   "VCS_STATE": {
     "provider": "GitHub",
