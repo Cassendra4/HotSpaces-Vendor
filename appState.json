@@ -143,7 +143,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/getPromotion.js",
-        "code": "let AWS = require('aws-sdk');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet dynamoDBService = require('./dynamoDBService');\n\nexports.handler = function (event, context, callback) {\n    let vendorID = event.queryStringParameters.vendorId;\n    console.log(vendorID);\n    dynamoDBService.getPromo(vendorID).then(function (data) {\n        let promoArray = [];\n\n\n        Promise.all(promoData.map(promo => new Promise(((resolve, reject) => {\n            ddb.scan({\n                TableName: 'HS_Redeem',\n                ExpressionAttributeValues: {\n                    ':promoId': promo.promoId\n                },\n                FilterExpression: 'promoId = :promoId'\n            }).promise().then(function (data) {\n                promo[\"redeems\"] = data.Items[0].noOfRedeems;\n                resolve(promoArray.push(promo))\n                //your logic goes here\n            }).catch(function (err) {\n                //handle error\n                resolve();\n            });\n        }\n        )))).then(\n            console.log(\"Promoss###\", promoArray)\n            ).catch(err => console.log(\"Error Happend\"))\n\n        console.log(data);\n        callback(null, {\n            \"isBase64Encoded\": true,\n            \"statusCode\": 200,\n            \"headers\": {\n                \"Access-Control-Allow-Origin\": \"*\",\n                \"Access-Control-Allow-Methods\": \"*\"\n            },\n            \"body\": JSON.stringify(data.Items)\n        });\n    }).catch(function (err) {\n        callback(null, {\n            \"isBase64Encoded\": true,\n            \"statusCode\": 502,\n            \"headers\": {\n                \"Access-Control-Allow-Origin\": \"*\",\n                \"Access-Control-Allow-Methods\": \"*\"\n            },\n            \"body\": err.message\n        });\n    });\n}",
+        "code": "let AWS = require('aws-sdk');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet dynamoDBService = require('./dynamoDBService');\n\nexports.handler = function (event, context, callback) {\n    let vendorID = event.queryStringParameters.vendorId;\n    console.log(vendorID);\n    dynamoDBService.getPromo(vendorID).then(function (data) {\n        callback(null, {\n            \"isBase64Encoded\": true,\n            \"statusCode\": 200,\n            \"headers\": {\n                \"Access-Control-Allow-Origin\": \"*\",\n                \"Access-Control-Allow-Methods\": \"*\"\n            },\n            \"body\": JSON.stringify(data.Items)\n        });\n    }).catch(function (err) {\n        callback(null, {\n            \"isBase64Encoded\": true,\n            \"statusCode\": 502,\n            \"headers\": {\n                \"Access-Control-Allow-Origin\": \"*\",\n                \"Access-Control-Allow-Methods\": \"*\"\n            },\n            \"body\": err.message\n        });\n    });\n}",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -155,8 +155,21 @@
             "id": "b9263822-4235-4cb2-9e11-3e568dffa95a",
             "name": "getPromo",
             "functionId": "fee713c1-57ce-4563-8763-b5987d956e02",
-            "event": "{\n   \"queryStringParameters\": {\n        \"vendorId\":\"assasasasasas\"\n    }\n}"
+            "event": "{\n   \"queryStringParameters\": {\n        \"vendorId\":\"ec667fdb-dbae-4d6b-8df7-9ad5306449e1\"\n    }\n}"
           }
+        },
+        "customSecurityPolicy": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Resource": "*",
+              "Action": [
+                "dynamodb:Scan",
+                "*"
+              ]
+            }
+          ]
         }
       },
       "9b90313d-8c54-42b1-9115-3b8a7826b663": {
@@ -228,6 +241,18 @@
             "functionId": "1f94f853-5bdb-41ea-afe7-231da7fae32f",
             "event": "{\n    \"queryStringParameters\": {\n        \"date\": \"1544180904415\",\n        \"user\": \"cassie\",\n        \"uuid\":\"JFbmO1PZxtUBjtxE3MMYSFzMeKh2\",\n        \"radius\": \"5000\",\n        \"longitude\": \"-122.4064\",\n        \"latitude\": \"37.7858\"\n    }\n}"
           }
+        },
+        "customSecurityPolicy": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Resource": "*",
+              "Action": [
+                "*"
+              ]
+            }
+          ]
         }
       },
       "0ea56e39-0305-4693-9692-86a3206d9a26": {
@@ -356,7 +381,7 @@
       "fee713c1-57ce-4563-8763-b5987d956e02",
       "4ed6d4c5-d54d-482b-b03a-2232e44d86aa"
     ],
-    "currentFileId": "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
+    "currentFileId": "fee713c1-57ce-4563-8763-b5987d956e02",
     "resources": {
       "ddbHSPromotions": {
         "name": "ddbHSPromotions",
@@ -848,7 +873,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1545295436601
+    "lastSave": 1545299100335
   },
   "VCS_STATE": {
     "provider": "GitHub",

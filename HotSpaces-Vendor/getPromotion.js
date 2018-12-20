@@ -6,30 +6,6 @@ exports.handler = function (event, context, callback) {
     let vendorID = event.queryStringParameters.vendorId;
     console.log(vendorID);
     dynamoDBService.getPromo(vendorID).then(function (data) {
-        let promoArray = [];
-
-
-        Promise.all(promoData.map(promo => new Promise(((resolve, reject) => {
-            ddb.scan({
-                TableName: 'HS_Redeem',
-                ExpressionAttributeValues: {
-                    ':promoId': promo.promoId
-                },
-                FilterExpression: 'promoId = :promoId'
-            }).promise().then(function (data) {
-                promo["redeems"] = data.Items[0].noOfRedeems;
-                resolve(promoArray.push(promo))
-                //your logic goes here
-            }).catch(function (err) {
-                //handle error
-                resolve();
-            });
-        }
-        )))).then(
-            console.log("Promoss###", promoArray)
-            ).catch(err => console.log("Error Happend"))
-
-        console.log(data);
         callback(null, {
             "isBase64Encoded": true,
             "statusCode": 200,
