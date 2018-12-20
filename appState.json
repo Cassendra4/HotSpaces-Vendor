@@ -377,9 +377,10 @@
           "parameters": {
             "TableName": "HS_Promotions",
             "ExpressionAttributeValues": {
-              ":vendor": "@{vendor}"
+              ":date": "@{date}",
+              ":box": "@{box}"
             },
-            "FilterExpression": "vendorId = :vendor"
+            "FilterExpression": "startDate <= :date and endDate >= :date and locationBox = :box"
           },
           "validator": {
             "validatableFields": {},
@@ -847,7 +848,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1545294284694
+    "lastSave": 1545295436601
   },
   "VCS_STATE": {
     "provider": "GitHub",
