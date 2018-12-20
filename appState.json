@@ -408,7 +408,7 @@
       "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
       "1aa0215b-f045-417f-b700-67fe0e112da0"
     ],
-    "currentFileId": "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
+    "currentFileId": "1aa0215b-f045-417f-b700-67fe0e112da0",
     "resources": {
       "ddbHSPromotions": {
         "name": "ddbHSPromotions",
@@ -817,7 +817,7 @@
         "name": "ddbHSRedeem",
         "type": "DynamoDB",
         "config": {
-          "mode": 0,
+          "mode": 1,
           "operation": "scan",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_Redeem",
@@ -900,7 +900,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1545304765629
+    "lastSave": 1545325360354
   },
   "VCS_STATE": {
     "provider": "GitHub",
