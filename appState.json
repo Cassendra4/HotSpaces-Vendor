@@ -143,7 +143,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/getPromotion.js",
-        "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\n\nexports.handler = function(event, context, callback) {\n    let vendorID = event.queryStringParameters.vendorId;\n    console.log(vendorID);\n    dynamoDBService.getPromo(vendorID).then(function (data) {\n        console.log(data);\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 200,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": JSON.stringify(data.Items)\n            });\n        }).catch(function (err) {\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": err.message\n            });\n        });\n}",
+        "code": "let AWS = require('aws-sdk');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet dynamoDBService = require('./dynamoDBService');\n\nexports.handler = function (event, context, callback) {\n    let vendorID = event.queryStringParameters.vendorId;\n    console.log(vendorID);\n    dynamoDBService.getPromo(vendorID).then(function (data) {\n        let promoData = data.Items;\n\n\n        Promise.all(promoData.map(promo => new Promise(((resolve, reject) =>\n            ddb.scan({\n                TableName: 'HS_Redeem',\n                ExpressionAttributeValues: {\n                    ':promoId': promo\n                },\n                FilterExpression: 'promoId = :promoId'\n            }).promise().then(function (data) {\n                console.log(data);\n                resolve(promoData[\"redeems\"] = data.Items[0].noOfRedeems)\n                //your logic goes here\n            }).catch(function (err) {\n                //handle error\n                resolve();\n            })\n        )))).then(\n            console.log(\"Promoss###\",promoData)\n        )\n\n        console.log(data);\n        callback(null, {\n            \"isBase64Encoded\": true,\n            \"statusCode\": 200,\n            \"headers\": {\n                \"Access-Control-Allow-Origin\": \"*\",\n                \"Access-Control-Allow-Methods\": \"*\"\n            },\n            \"body\": JSON.stringify(data.Items)\n        });\n    }).catch(function (err) {\n        callback(null, {\n            \"isBase64Encoded\": true,\n            \"statusCode\": 502,\n            \"headers\": {\n                \"Access-Control-Allow-Origin\": \"*\",\n                \"Access-Control-Allow-Methods\": \"*\"\n            },\n            \"body\": err.message\n        });\n    });\n}",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -351,9 +351,11 @@
     "deletedFiles": [],
     "rootNode": "93ffce99-7f73-47ff-958a-0d6e790962d6",
     "openFiles": [
-      "dac9deff-34fa-46f9-81b9-d82feaf60240"
+      "0136c15c-311e-415a-ad68-78090bf12541",
+      "1f94f853-5bdb-41ea-afe7-231da7fae32f",
+      "fee713c1-57ce-4563-8763-b5987d956e02"
     ],
-    "currentFileId": "dac9deff-34fa-46f9-81b9-d82feaf60240",
+    "currentFileId": "fee713c1-57ce-4563-8763-b5987d956e02",
     "resources": {
       "ddbHSPromotions": {
         "name": "ddbHSPromotions",
@@ -438,7 +440,7 @@
             "hasSortKey": false,
             "sortKey": "",
             "sortKeyType": "S",
-            "mode": 1
+            "mode": 0
           },
           "parameters": {
             "TableName": "HS_Vendor",
@@ -762,8 +764,8 @@
         "name": "ddbHSRedeem",
         "type": "DynamoDB",
         "config": {
-          "mode": 1,
-          "operation": "update",
+          "mode": 0,
+          "operation": "scan",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_Redeem",
             "name": "HS_Redeem",
@@ -776,13 +778,10 @@
           },
           "parameters": {
             "TableName": "HS_Redeem",
-            "Key": {
-              "redeemId": "@{data.redeemId}"
-            },
             "ExpressionAttributeValues": {
-              ":redeem": "@{data.val}"
+              ":promoId": "@{promoId}"
             },
-            "UpdateExpression": "set noOfRedeems = :redeem"
+            "FilterExpression": "promoId = :"
           },
           "validator": {
             "validatableFields": {},
@@ -848,7 +847,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1545037582818
+    "lastSave": 1545286865082
   },
   "VCS_STATE": {
     "provider": "GitHub",
