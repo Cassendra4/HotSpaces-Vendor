@@ -353,7 +353,8 @@
     "openFiles": [
       "0136c15c-311e-415a-ad68-78090bf12541",
       "1f94f853-5bdb-41ea-afe7-231da7fae32f",
-      "fee713c1-57ce-4563-8763-b5987d956e02"
+      "fee713c1-57ce-4563-8763-b5987d956e02",
+      "4ed6d4c5-d54d-482b-b03a-2232e44d86aa"
     ],
     "currentFileId": "fee713c1-57ce-4563-8763-b5987d956e02",
     "resources": {
@@ -362,7 +363,7 @@
         "type": "DynamoDB",
         "config": {
           "mode": 1,
-          "operation": "scan",
+          "operation": "query",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_Promotions",
             "name": "HS_Promotions",
@@ -376,10 +377,11 @@
           "parameters": {
             "TableName": "HS_Promotions",
             "ExpressionAttributeValues": {
-              ":date": "@{date}",
-              ":box": "@{box}"
+              ":promo": "@{data.promo}",
+              ":vendor": "@{data.vendor}"
             },
-            "FilterExpression": "startDate <= :date and endDate >= :date and locationBox = :box"
+            "KeyConditionExpression": "promoId = :promo",
+            "FilterExpression": "vendorId = :vendor"
           },
           "validator": {
             "validatableFields": {},
@@ -394,7 +396,7 @@
         "type": "DynamoDB",
         "config": {
           "mode": 1,
-          "operation": "put",
+          "operation": "get",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_QR",
             "name": "HS_QR",
@@ -407,15 +409,8 @@
           },
           "parameters": {
             "TableName": "HS_QR",
-            "Item": {
-              "vendorId": "@{qr.vendor}",
-              "promoId": "@{qr.promo}",
-              "QRId": "@{uuid}",
-              "category": "@{qr.type}",
-              "offerType": "@{qr.offerType}",
-              "user": "@{qr.user}",
-              "grabTime": "@{qr.grabTime}",
-              "userName": "@{qr.userName}"
+            "Key": {
+              "QRId": "@{qr}"
             }
           },
           "validator": {
@@ -431,7 +426,7 @@
         "type": "DynamoDB",
         "config": {
           "mode": 1,
-          "operation": "get",
+          "operation": "scan",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_Vendor",
             "name": "HS_Vendor",
@@ -443,10 +438,7 @@
             "mode": 0
           },
           "parameters": {
-            "TableName": "HS_Vendor",
-            "Key": {
-              "vendor_id": "@{vendorId}"
-            }
+            "TableName": "HS_Vendor"
           },
           "validator": {
             "validatableFields": {},
@@ -461,7 +453,7 @@
         "type": "DynamoDB",
         "config": {
           "mode": 1,
-          "operation": "query",
+          "operation": "put",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_User",
             "name": "HS_User",
@@ -474,10 +466,12 @@
           },
           "parameters": {
             "TableName": "HS_User",
-            "ExpressionAttributeValues": {
-              ":user_id": "@{userId}"
-            },
-            "KeyConditionExpression": "user_id = :user_id"
+            "Item": {
+              "user_id": "@{userId}",
+              "name": "@{name}",
+              "role": "@{role}",
+              "vendor_id": "@{vendor_id}"
+            }
           },
           "validator": {
             "validatableFields": {},
@@ -779,9 +773,10 @@
           "parameters": {
             "TableName": "HS_Redeem",
             "ExpressionAttributeValues": {
-              ":promoId": "@{promoId}"
+              ":promo": "@{data.promo}",
+              ":user": "@{data.userId}"
             },
-            "FilterExpression": "promoId = :"
+            "FilterExpression": "promoId = :promo and userId = :user"
           },
           "validator": {
             "validatableFields": {},
@@ -847,7 +842,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1545289744884
+    "lastSave": 1545292063927
   },
   "VCS_STATE": {
     "provider": "GitHub",
