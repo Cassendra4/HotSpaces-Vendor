@@ -408,7 +408,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/addUser2.js",
-        "code": "let AWS = require('aws-sdk');\nconst cognito_idp = new AWS.CognitoIdentityServiceProvider();\n\nexports.handler = function (event, context, callback) {\n    let email = event.email;\n    let phone = event.phone;\n    let role = event.role;\n    cognito_idp.adminCreateUser({\n        UserPoolId: process.env.UserPoolId_cognitoHotspaceVendor,\n        Username: `${email}`,\n        DesiredDeliveryMediums: [\"EMAIL\", \"SMS\"],\n        ForceAliasCreation: false,\n        TemporaryPassword: \"12345678\",\n        UserAttributes: [{\n            Name: \"custom:role\",\n            Value: `${role}`\n        }, {\n            Name: \"email\",\n            Value: `${email}`\n        }, {\n            Name: \"phone_number\",\n            Value: `${phone}`\n        }, {\n            Name: \"custom:email_verified\",\n            Value: \"true\"\n        }],\n        ValidationData: []\n    }, function (error, data) {\n        if (error) {\n            console.log(error)\n            // implement error handling logic here\n            throw error;\n        }\n        // your logic goes within this block\n        console.log(data);\n    });\n\n\n    callback(null, { \"message\": \"Successfully executed\" });\n}",
+        "code": "let AWS = require('aws-sdk');\nconst cognito_idp = new AWS.CognitoIdentityServiceProvider();\n\nexports.handler = function (event, context, callback) {\n    let email = event.email;\n    let phone = event.phone;\n    let role = event.role;\n    cognito_idp.adminCreateUser({\n        UserPoolId: process.env.UserPoolId_cognitoHotspaceVendor,\n        Username: `${email}`,\n        DesiredDeliveryMediums: [\"EMAIL\", \"SMS\"],\n        ForceAliasCreation: true,\n        TemporaryPassword: \"12345678\",\n        UserAttributes: [{\n            Name: \"custom:role\",\n            Value: `${role}`\n        }, {\n            Name: \"email\",\n            Value: `${email}`\n        }, {\n            Name: \"phone_number\",\n            Value: `${phone}`\n        }, {\n            Name: \"custom:email_verified\",\n            Value: \"true\"\n        }],\n        ValidationData: []\n    }, function (error, data) {\n        if (error) {\n            console.log(error)\n            // implement error handling logic here\n            throw error;\n        }\n        // your logic goes within this block\n        console.log(data);\n    });\n\n\n    callback(null, { \"message\": \"Successfully executed\" });\n}",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -420,7 +420,7 @@
             "id": "0877566f-cd22-4ac4-b0fc-0352982abddb",
             "name": "Unnamed event",
             "functionId": "c7ffc88b-ba55-4132-b505-700a470fa513",
-            "event": "{\n    \"email\": \"andun@adroitlogic.com\",\n    \"phone\": \"+94770630943\",\n    \"role\": \"ADMIN\"\n}"
+            "event": "{\n    \"email\": \"andun+@adroitlogic.com\",\n    \"phone\": \"+94770630943\",\n    \"role\": \"ADMIN\"\n}"
           }
         }
       }
@@ -872,7 +872,8 @@
         "type": "CognitoIdentityServiceProvider",
         "config": {
           "mode": 0,
-          "name": "HotspaceVendor",
+          "name": "Hotspace-Vendor",
+          "arn": "arn:aws:cognito-idp:us-east-1:318300609668:userpool/undefined",
           "userPool": {
             "Name": "Hotspace-Vendor",
             "isNew": true,
@@ -1115,7 +1116,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1546857393097
+    "lastSave": 1546858674624
   },
   "VCS_STATE": {
     "provider": "GitHub",

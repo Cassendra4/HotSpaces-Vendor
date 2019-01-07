@@ -9,7 +9,7 @@ exports.handler = function (event, context, callback) {
         UserPoolId: process.env.UserPoolId_cognitoHotspaceVendor,
         Username: `${email}`,
         DesiredDeliveryMediums: ["EMAIL", "SMS"],
-        ForceAliasCreation: false,
+        ForceAliasCreation: true,
         TemporaryPassword: "12345678",
         UserAttributes: [{
             Name: "custom:role",
