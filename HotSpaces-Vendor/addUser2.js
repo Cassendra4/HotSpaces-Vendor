@@ -11,7 +11,16 @@ exports.handler = function (event, context, callback) {
         DesiredDeliveryMediums: ["EMAIL", "SMS"],
         ForceAliasCreation: false,
         TemporaryPassword: "12345678",
-        UserAttributes: [{ Name: "custom:role", Value: `${role}` }],
+        UserAttributes: [{
+            Name: "custom:role",
+            Value: `${role}`
+        }, {
+            Name: "email",
+            Value: `${email}`
+        }, {
+            Name: "phone_number",
+            Value: `${phone}`
+        }],
         ValidationData: []
     }, function (error, data) {
         if (error) {
