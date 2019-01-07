@@ -408,7 +408,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/addUser2.js",
-        "code": "let AWS = require('aws-sdk');\nconst cognito_idp = new AWS.CognitoIdentityServiceProvider();\n\nexports.handler = function (event, context, callback) {\n    let email = event.email;\n    let phone = event.phone;\n    let role = event.role;\n    cognito_idp.adminCreateUser({\n        UserPoolId: process.env.UserPoolId_cognitoHotspacesVendor,\n        Username: `${email}`,\n        DesiredDeliveryMediums: [\"EMAIL\", \"SMS\"],\n        ForceAliasCreation: false,\n        TemporaryPassword: \"12345678\",\n        UserAttributes: [{\n            Name: \"email\",\n            Value: `${email}`\n        }, {\n            Name: \"phone_number\",\n            Value: `${phone}`\n        }, {\n            Name: \"custom:Role\",\n            Value: `${role}`\n        }],\n        ValidationData: []\n    }, function (error, data) {\n        if (error) {\n            console.log(error);\n            // implement error handling logic here\n            throw error;\n        }\n        console.log(data)\n        // your logic goes within this block\n    });\n\n    callback(null, { \"message\": \"Successfully executed\" });\n}",
+        "code": "let AWS = require('aws-sdk');\nconst cognito_idp = new AWS.CognitoIdentityServiceProvider();\n\nexports.handler = function (event, context, callback) {\n    let email = event.email;\n    let phone = event.phone;\n    let role = event.role;\n    cognito_idp.adminCreateUser({\n        UserPoolId: process.env.UserPoolId_cognitoHotspaceVendor,\n        Username: `${email}`,\n        DesiredDeliveryMediums: [\"EMAIL\", \"SMS\"],\n        ForceAliasCreation: false,\n        TemporaryPassword: \"12345678\",\n        UserAttributes: [{ Name: \"custom:role\", Value: `${role}` }],\n        ValidationData: []\n    }, function (error, data) {\n        if (error) {\n            console.log(error)\n            // implement error handling logic here\n            throw error;\n        }\n        // your logic goes within this block\n        console.log(data);\n    });\n\n\n    callback(null, { \"message\": \"Successfully executed\" });\n}",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -859,25 +859,24 @@
         },
         "globallyEditable": false
       },
-      "cognitoHotspacesVendor": {
-        "name": "cognitoHotspacesVendor",
+      "cognitoHotspaceVendor": {
+        "name": "cognitoHotspaceVendor",
         "type": "CognitoIdentityServiceProvider",
         "config": {
           "mode": 0,
-          "name": "Hotspaces-Vendor",
-          "arn": "arn:aws:cognito-idp:us-east-1:318300609668:userpool/undefined",
+          "name": "HotspaceVendor",
           "userPool": {
-            "Name": "Hotspaces-Vendor",
+            "Name": "Hotspace-Vendor",
             "isNew": true,
             "AutoVerifiedAttributes": [
               "email",
               "phone_number"
             ],
-            "AliasAttributes": [],
-            "UsernameAttributes": [
+            "AliasAttributes": [
               "email",
               "phone_number"
             ],
+            "UsernameAttributes": [],
             "Policies": {
               "PasswordPolicy": {
                 "MinimumLength": 8,
@@ -1015,7 +1014,7 @@
                 "Required": false
               },
               {
-                "Name": "Role",
+                "Name": "role",
                 "AttributeDataType": "String",
                 "DeveloperOnlyAttribute": false,
                 "Required": false,
@@ -1026,8 +1025,8 @@
               "AllowAdminCreateUserOnly": true,
               "UnusedAccountValidityDays": 7,
               "InviteMessageTemplate": {
-                "SMSMessage": "Join my app. Your password for user {username} is {####}",
-                "EmailMessage": "Join my app. Your password for user {username} is {####}",
+                "SMSMessage": "Join my app {####} {username}",
+                "EmailMessage": "Join my app {####} {username}",
                 "EmailSubject": "Join my app"
               }
             }
@@ -1091,7 +1090,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1546842307706
+    "lastSave": 1546844846365
   },
   "VCS_STATE": {
     "provider": "GitHub",
