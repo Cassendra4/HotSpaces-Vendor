@@ -408,7 +408,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/addUser2.js",
-        "code": "let AWS = require('aws-sdk');\nconst cognito_idp = new AWS.CognitoIdentityServiceProvider();\n\nexports.handler = function (event, context, callback) {\n    let email = event.email;\n    let phone = event.phone;\n    let role = event.role;\n    cognito_idp.adminCreateUser({\n        UserPoolId: process.env.UserPoolId_cognitoHotspaceVendor,\n        Username: `${email}`,\n        DesiredDeliveryMediums: [\"EMAIL\", \"SMS\"],\n        ForceAliasCreation: false,\n        TemporaryPassword: \"12345678\",\n        UserAttributes: [{\n            Name: \"custom:role\",\n            Value: `${role}`\n        }, {\n            Name: \"email\",\n            Value: `${email}`\n        }, {\n            Name: \"phone_number\",\n            Value: `${phone}`\n        }],\n        ValidationData: []\n    }, function (error, data) {\n        if (error) {\n            console.log(error)\n            // implement error handling logic here\n            throw error;\n        }\n        // your logic goes within this block\n        console.log(data);\n    });\n\n\n    callback(null, { \"message\": \"Successfully executed\" });\n}",
+        "code": "let AWS = require('aws-sdk');\nconst cognito_idp = new AWS.CognitoIdentityServiceProvider();\n\nexports.handler = function (event, context, callback) {\n    let email = event.email;\n    let phone = event.phone;\n    let role = event.role;\n    cognito_idp.adminCreateUser({\n        UserPoolId: process.env.UserPoolId_cognitoHotspaceVendor,\n        Username: `${email}`,\n        DesiredDeliveryMediums: [\"EMAIL\", \"SMS\"],\n        ForceAliasCreation: false,\n        TemporaryPassword: \"12345678\",\n        UserAttributes: [{\n            Name: \"custom:role\",\n            Value: `${role}`\n        }, {\n            Name: \"email\",\n            Value: `${email}`\n        }, {\n            Name: \"phone_number\",\n            Value: `${phone}`\n        }, {\n            Name: \"custom:phone_number_verified\",\n            Value: \"true\"\n        }, {\n            Name: \"custom:email_verified\",\n            Value: \"true\"\n        }],\n        ValidationData: []\n    }, function (error, data) {\n        if (error) {\n            console.log(error)\n            // implement error handling logic here\n            throw error;\n        }\n        // your logic goes within this block\n        console.log(data);\n    });\n\n\n    callback(null, { \"message\": \"Successfully executed\" });\n}",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -1028,6 +1028,20 @@
                 "DeveloperOnlyAttribute": false,
                 "Required": false,
                 "Mutable": true
+              },
+              {
+                "Name": "phone_number_verified",
+                "AttributeDataType": "Boolean",
+                "DeveloperOnlyAttribute": false,
+                "Required": false,
+                "Mutable": true
+              },
+              {
+                "Name": "email_verified",
+                "AttributeDataType": "Boolean",
+                "DeveloperOnlyAttribute": false,
+                "Required": false,
+                "Mutable": true
               }
             ],
             "SmsConfiguration": {
@@ -1109,7 +1123,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1546851738336
+    "lastSave": 1546857105393
   },
   "VCS_STATE": {
     "provider": "GitHub",
