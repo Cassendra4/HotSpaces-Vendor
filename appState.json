@@ -1034,7 +1034,7 @@
                 "AttributeDataType": "Boolean",
                 "DeveloperOnlyAttribute": false,
                 "Required": false,
-                "Mutable": false
+                "Mutable": true
               }
             ],
             "SmsConfiguration": {
@@ -1116,7 +1116,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1546858674624
+    "lastSave": 1546860585651
   },
   "VCS_STATE": {
     "provider": "GitHub",
