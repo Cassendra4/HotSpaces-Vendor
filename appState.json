@@ -307,7 +307,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/addUser.js",
-        "code": "let AWS = require('aws-sdk');\nconst cognito_idp = new AWS.CognitoIdentityServiceProvider();\nlet dynamoDBService = require('./dynamoDBService');\nlet utils = require('./utils');\n\nexports.handler = function (event, context, callback) {\n\n    if (utils.authorize(event, callback)) {\n\n        let body = JSON.parse(event.body);\n        let name = body.name;\n        let email = body.email;\n        let phone_number = body.phone_number;\n        let temp_password = body.temp_password;\n        let role = body.role;\n        let vendorId = body.vendor_id;\n\n        cognito_idp.adminCreateUser({\n            UserPoolId: \"us-east-1_mcdTV1jKi\",\n            Username: `${email}`,\n            DesiredDeliveryMediums: [\"EMAIL\", \"SMS\"],\n            ForceAliasCreation: false,\n            TemporaryPassword: `${temp_password}`,\n            UserAttributes: [{\n                Name: \"name\",\n                Value: `${name}`\n            }, {\n                Name: \"email\",\n                Value: `${email}`\n            }, {\n                Name: \"phone_number\",\n                Value: `${phone_number}`\n            },],\n            ValidationData: []\n        }, function (error, data) {\n            if (error) {\n                console.log(error);\n                callback(null, {\n                    \"isBase64Encoded\": true,\n                    \"statusCode\": 502,\n                    \"headers\": {\n                        \"Access-Control-Allow-Origin\": \"*\",\n                        \"Access-Control-Allow-Methods\": \"*\"\n                    },\n                    \"body\": error.message\n                });\n            } else {\n                console.log(data);\n                dynamoDBService.addUser({\n                    uid: data.User.Username,\n                    name: name,\n                    role: role,\n                    vendor_id: vendorId\n                }).then(function () {\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 200,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": 'Successfully added vendor with name : ' + name\n                    });\n                }).catch(function (error) {\n                    console.log(error);\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 502,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": 'User added to cognito pool but failed to add to dynamo DB. ' + error.message\n                    });\n                });\n\n            }\n        });\n    }\n}",
+        "code": "let AWS = require('aws-sdk');\nconst cognito_idp = new AWS.CognitoIdentityServiceProvider();\nlet dynamoDBService = require('./dynamoDBService');\nlet utils = require('./utils');\n\nexports.handler = function (event, context, callback) {\n\n    if (utils.authorize(event, callback)) {\n\n        let body = JSON.parse(event.body);\n        let name = body.name;\n        let email = body.email;\n        let phone_number = body.phone_number;\n        let temp_password = body.temp_password;\n        let role = body.role;\n        let vendorId = body.vendor_id;\n\n        cognito_idp.adminCreateUser({\n            UserPoolId: \"us-east-1_mcdTV1jKi\",\n            Username: `${email}`,\n            DesiredDeliveryMediums: [\"EMAIL\", \"SMS\"],\n            ForceAliasCreation: false,\n            TemporaryPassword: `${temp_password}`,\n            UserAttributes: [{\n                Name: \"name\",\n                Value: `${name}`\n            }, {\n                Name: \"email\",\n                Value: `${email}`\n            }, {\n                Name: \"phone_number\",\n                Value: `${phone_number}`\n            }, {\n                Name: \"phone_number_verified\",\n                Value: \"true\"\n            }, {\n                Name: \"email_verified\",\n                Value: \"true\"\n            }],\n            ValidationData: []\n        }, function (error, data) {\n            if (error) {\n                console.log(error);\n                callback(null, {\n                    \"isBase64Encoded\": true,\n                    \"statusCode\": 502,\n                    \"headers\": {\n                        \"Access-Control-Allow-Origin\": \"*\",\n                        \"Access-Control-Allow-Methods\": \"*\"\n                    },\n                    \"body\": error.message\n                });\n            } else {\n                console.log(data);\n                dynamoDBService.addUser({\n                    uid: data.User.Username,\n                    name: name,\n                    role: role,\n                    vendor_id: vendorId\n                }).then(function () {\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 200,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": 'Successfully added vendor with name : ' + name\n                    });\n                }).catch(function (error) {\n                    console.log(error);\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 502,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": 'User added to cognito pool but failed to add to dynamo DB. ' + error.message\n                    });\n                });\n\n            }\n        });\n    }\n}",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -408,7 +408,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/addUser2.js",
-        "code": "let AWS = require('aws-sdk');\nconst cognito_idp = new AWS.CognitoIdentityServiceProvider();\n\nexports.handler = function (event, context, callback) {\n    let email = event.email;\n    let phone = event.phone;\n    let role = event.role;\n    cognito_idp.adminCreateUser({\n        UserPoolId: process.env.UserPoolId_cognitoHotspaceVendor,\n        Username: `${email}`,\n        DesiredDeliveryMediums: [\"EMAIL\", \"SMS\"],\n        ForceAliasCreation: true,\n        TemporaryPassword: \"12345678\",\n        UserAttributes: [{\n            Name: \"custom:role\",\n            Value: `${role}`\n        }, {\n            Name: \"email\",\n            Value: `${email}`\n        }, {\n            Name: \"phone_number\",\n            Value: `${phone}`\n        }, {\n            Name: \"custom:email_verified\",\n            Value: true\n        }],\n        ValidationData: []\n    }, function (error, data) {\n        if (error) {\n            console.log(error)\n            // implement error handling logic here\n            throw error;\n        }\n        // your logic goes within this block\n        console.log(data);\n    });\n\n\n    callback(null, { \"message\": \"Successfully executed\" });\n}",
+        "code": "let AWS = require('aws-sdk');\nconst cognito_idp = new AWS.CognitoIdentityServiceProvider();\n\nexports.handler = function (event, context, callback) {\n    let email = event.email;\n    let phone = event.phone;\n    let role = event.role;\n    cognito_idp.adminCreateUser({\n        UserPoolId: process.env.UserPoolId_cognitoHotspaceVendor,\n        Username: `${email}`,\n        DesiredDeliveryMediums: [\"EMAIL\", \"SMS\"],\n        ForceAliasCreation: true,\n        TemporaryPassword: \"12345678\",\n        UserAttributes: [{\n            Name: \"custom:role\",\n            Value: `${role}`\n        }, {\n            Name: \"email\",\n            Value: `${email}`\n        }, {\n            Name: \"phone_number\",\n            Value: `${phone}`\n        }, {\n            Name: \"email_verified\",\n            Value: true\n        }],\n        ValidationData: []\n    }, function (error, data) {\n        if (error) {\n            console.log(error)\n            // implement error handling logic here\n            throw error;\n        }\n        // your logic goes within this block\n        console.log(data);\n    });\n\n\n    callback(null, { \"message\": \"Successfully executed\" });\n}",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -420,7 +420,7 @@
             "id": "0877566f-cd22-4ac4-b0fc-0352982abddb",
             "name": "Unnamed event",
             "functionId": "c7ffc88b-ba55-4132-b505-700a470fa513",
-            "event": "{\n    \"email\": \"andun+@adroitlogic.com\",\n    \"phone\": \"+94770630943\",\n    \"role\": \"ADMIN\"\n}"
+            "event": "{\n    \"email\": \"andun+12@adroitlogic.com\",\n    \"phone\": \"+94770630943\",\n    \"role\": \"ADMIN\"\n}"
           }
         }
       }
@@ -431,7 +431,7 @@
       "a7f41488-5b3a-43b0-99fe-c0e3dd313f01",
       "c7ffc88b-ba55-4132-b505-700a470fa513"
     ],
-    "currentFileId": "c7ffc88b-ba55-4132-b505-700a470fa513",
+    "currentFileId": "a7f41488-5b3a-43b0-99fe-c0e3dd313f01",
     "resources": {
       "ddbHSPromotions": {
         "name": "ddbHSPromotions",
@@ -584,8 +584,7 @@
               }
             },
             "AutoVerifiedAttributes": [
-              "email",
-              "phone_number"
+              "email"
             ],
             "UsernameAttributes": [
               "email",
@@ -603,7 +602,7 @@
               "DefaultEmailOption": "CONFIRM_WITH_LINK"
             },
             "SmsAuthenticationMessage": "Your authentication code is {####}. ",
-            "MfaConfiguration": "OFF",
+            "MfaConfiguration": "OPTIONAL",
             "EmailConfiguration": {},
             "SmsConfiguration": {
               "SnsCallerArn": "arn:aws:iam::318300609668:role/service-role/HotSpacesVendorAppDev-SMS-Role",
@@ -1031,7 +1030,7 @@
               {
                 "Name": "email_verified",
                 "AttributeDataType": "Boolean",
-                "DeveloperOnlyAttribute": true,
+                "DeveloperOnlyAttribute": false,
                 "Required": false,
                 "Mutable": true
               }
@@ -1115,7 +1114,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1546861219444
+    "lastSave": 1546862873277
   },
   "VCS_STATE": {
     "provider": "GitHub",

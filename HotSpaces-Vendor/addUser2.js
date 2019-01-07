@@ -21,7 +21,7 @@ exports.handler = function (event, context, callback) {
             Name: "phone_number",
             Value: `${phone}`
         }, {
-            Name: "custom:email_verified",
+            Name: "email_verified",
             Value: true
         }],
         ValidationData: []

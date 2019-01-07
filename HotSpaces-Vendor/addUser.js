@@ -30,7 +30,13 @@ exports.handler = function (event, context, callback) {
             }, {
                 Name: "phone_number",
                 Value: `${phone_number}`
-            },],
+            }, {
+                Name: "phone_number_verified",
+                Value: "true"
+            }, {
+                Name: "email_verified",
+                Value: "true"
+            }],
             ValidationData: []
         }, function (error, data) {
             if (error) {
