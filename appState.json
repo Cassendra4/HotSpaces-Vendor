@@ -441,7 +441,7 @@
         "type": "DynamoDB",
         "config": {
           "mode": 1,
-          "operation": "delete",
+          "operation": "query",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_Promotions",
             "name": "HS_Promotions",
@@ -450,14 +450,16 @@
             "hasSortKey": true,
             "sortKey": "timestamp",
             "sortKeyType": "N",
-            "mode": 1
+            "mode": 0
           },
           "parameters": {
             "TableName": "HS_Promotions",
-            "Key": {
-              "promoId": "@{promoData.promoID}",
-              "timestamp": "@{promoData.timestamp}"
-            }
+            "ExpressionAttributeValues": {
+              ":promo": "@{data.promo}",
+              ":vendor": "@{data.vendor}"
+            },
+            "KeyConditionExpression": "promoId = :promo",
+            "FilterExpression": "vendorId = :vendor"
           },
           "validator": {
             "validatableFields": {},
@@ -472,7 +474,7 @@
         "type": "DynamoDB",
         "config": {
           "mode": 1,
-          "operation": "put",
+          "operation": "get",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_QR",
             "name": "HS_QR",
@@ -485,15 +487,8 @@
           },
           "parameters": {
             "TableName": "HS_QR",
-            "Item": {
-              "vendorId": "@{qr.vendor}",
-              "promoId": "@{qr.promo}",
-              "QRId": "@{uuid}",
-              "category": "@{qr.type}",
-              "offerType": "@{qr.offerType}",
-              "user": "@{qr.user}",
-              "grabTime": "@{qr.grabTime}",
-              "userName": "@{qr.userName}"
+            "Key": {
+              "QRId": "@{qr}"
             }
           },
           "validator": {
@@ -509,7 +504,7 @@
         "type": "DynamoDB",
         "config": {
           "mode": 1,
-          "operation": "scan",
+          "operation": "query",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_Vendor",
             "name": "HS_Vendor",
@@ -521,7 +516,11 @@
             "mode": 0
           },
           "parameters": {
-            "TableName": "HS_Vendor"
+            "TableName": "HS_Vendor",
+            "ExpressionAttributeValues": {
+              ":vendor_id": "@{vendorId}"
+            },
+            "KeyConditionExpression": "vendor_id = :vendor_id"
           },
           "validator": {
             "validatableFields": {},
@@ -855,10 +854,9 @@
           "parameters": {
             "TableName": "HS_Redeem",
             "ExpressionAttributeValues": {
-              ":promo": "@{data.promo}",
-              ":user": "@{data.userId}"
+              ":promoId": "@{promoId}"
             },
-            "FilterExpression": "promoId = :promo and userId = :user"
+            "FilterExpression": "promoId = :promoId"
           },
           "validator": {
             "validatableFields": {},
@@ -1116,7 +1114,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1547102053841
+    "lastSave": 1547102651776
   },
   "VCS_STATE": {
     "provider": "GitHub",
