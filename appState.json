@@ -121,7 +121,12 @@
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/addPromotion.js",
         "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\nconst uuidv4 = require('uuid/v4');\nconst NodeGeocoder = require('node-geocoder');\n\nexports.handler = function (event, context, callback) {\n\n    let body = JSON.parse(event.body);\n    let timestamp = Math.round((new Date()).getTime() / 1000);\n\n    const options = {\n        provider: 'google',\n\n        httpAdapter: 'https',\n        apiKey: process.env.mapsApiKey,\n        formatter: null\n    };\n\n    let geocoder = NodeGeocoder(options);\n    console.log(\"GeoLocator\");\n    geocoder.reverse({ lat: body.latNLong.lat, lon: body.latNLong.long })\n        .then(res => {\n            console.log(res);\n            let address = res[0].formattedAddress\n            let promoData = {\n                promoId: uuidv4(),\n                vendorId: body.vendorId,\n                offerType: body.offerType,\n                discount: body.discount,\n                startDate: body.startDate,\n                endDate: body.endDate,\n                startTime: body.startTime,\n                endTime: body.endTime,\n                selectedDays: body.selectedDays,\n                description: body.description,\n                title: body.title,\n                unitPrice: body.unitPrice,\n                imgUrl: body.imgUrls,\n                terms: body.terms,\n                businessType: body.businessType,\n                timestamp: timestamp,\n                locationBox: body.locationBox,\n                latNLong: body.latNLong,\n                address: address\n            };\n            console.log(\"PromoData$$$\", promoData)\n            dynamoDBService.addPromo(promoData)\n                .then(function (data) {\n                    console.log(\"Success\", data);\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 200,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": JSON.stringify(promoData)\n                    });\n                }).catch(function (err) {\n                    console.log(\"Error\", err);\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 502,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": err.message\n                    });\n                });\n\n        }).catch(err => {\n            console.log(\"error\", err.message);\n        })\n\n}",
-        "triggers": [],
+        "triggers": [
+          {
+            "resourceName": "apigusEast1HSVendorpromopost",
+            "config": {}
+          }
+        ],
         "config": {
           "runtime": "nodejs8.10",
           "timeout": 60,
@@ -229,7 +234,7 @@
         "children": [],
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/getPromotions.js",
-        "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet moment = require('moment');\nlet axios = require('axios');\nlet _ = require(\"lodash\");\nlet authService = require('./authService');\n\nexports.handler = function (event, context, callback) {\n    console.log(event);\n    let date = moment(Number(event.queryStringParameters.date)).format('YYYY-MM-DD');\n    console.log(date);\n    let userUUID = event.queryStringParameters.uuid;\n    let userName = event.queryStringParameters.user;\n    let latitude = Number(event.queryStringParameters.latitude);\n    let longitude = Number(event.queryStringParameters.longitude);\n    let radius = Number(event.queryStringParameters.radius);\n\n\n\n     authService.validateUser(userUUID, userName, function (response) {\n        if (response.error) {\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": JSON.stringify(response.error)\n            });\n        } else if (response.validated) {\n\n            boxKeyObject = calculateBox(latitude, longitude);\n            noOfBoxes = getNumberOfBoxes(radius);\n\n            latMin = +boxKeyObject.lat - +noOfBoxes\n            latMax = +boxKeyObject.lat + +noOfBoxes\n            longMin = +boxKeyObject.long - +noOfBoxes\n            longMax = +boxKeyObject.long + +noOfBoxes\n\n            getPromotions(latMin, latMax, longMin, longMax, date)\n                .then(data => {\n                    console.log(\"%%%%\", data);\n                    let promoList = data;\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 200,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": JSON.stringify(promoList)\n                    });\n                }).catch(\n                    err => {\n                        callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 200,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": err.message\n                    });\n                    }\n                )\n\n        } else {\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 403,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": \"User validation failed.\"\n            });\n        }\n    });\n   \n}\n\nconst getPromotions = (latMin, latMax, longMin, longMax, date) => \n    Promise.all(_.flatten(_.range(latMin, latMax)\n            .map(lat => _.range(longMin, longMax)\n                .map(long => `${lat},${long}`)))\n        .map(boxKey => \n            dynamoDBService.retrievePromos(date, boxKey)\n                .then(data => data.Items)\n                .then(items => Promise.all(\n                    \n                    items.map(promo => \n                    dynamoDBService.getVendor(promo.vendorId)\n                        .then(vendor => ({\n                            ...promo,\n                            imgs: promo.imgUrls,\n                            vendorName: vendor.Items[0].name,\n                        }))\n                )))))\n            .then(_.flatten);\n\nfunction calculateBox(latitude, longitude){\n    let latKey = Math.trunc((latitude + 90) * 10);\n        let longKey = Math.trunc((longitude + 180) * 10);\n        return {lat: latKey, long: longKey};\n}\n\nfunction getNumberOfBoxes(radiusInMeters){\n        let numberOfBoxes = Math.ceil(radiusInMeters / 10000);\n        return numberOfBoxes;\n}\n\n",
+        "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\nconst ddb = new AWS.DynamoDB.DocumentClient();\nlet moment = require('moment');\nlet axios = require('axios');\nlet _ = require(\"lodash\");\nlet authService = require('./authService');\n\nexports.handler = function (event, context, callback) {\n    console.log(event);\n    let date = moment(Number(event.queryStringParameters.date)).format('YYYY-MM-DD');\n    console.log(date);\n    let userUUID = event.queryStringParameters.uuid;\n    let userName = event.queryStringParameters.user;\n    let latitude = Number(event.queryStringParameters.latitude);\n    let longitude = Number(event.queryStringParameters.longitude);\n    let radius = Number(event.queryStringParameters.radius);\n\n\n\n     authService.validateUser(userUUID, userName, function (response) {\n        if (response.error) {\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": JSON.stringify(response.error)\n            });\n        } else if (response.validated) {\n\n            boxKeyObject = calculateBox(latitude, longitude);\n            noOfBoxes = getNumberOfBoxes(radius);\n\n            latMin = +boxKeyObject.lat - +noOfBoxes\n            latMax = +boxKeyObject.lat + +noOfBoxes\n            longMin = +boxKeyObject.long - +noOfBoxes\n            longMax = +boxKeyObject.long + +noOfBoxes\n\n            getPromotions(latMin, latMax, longMin, longMax, date)\n                .then(data => {\n                    console.log(\"*****\", data);\n                    let promoList = data;\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 200,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": JSON.stringify(promoList)\n                    });\n                }).catch(\n                    err => {\n                        callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 200,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": err.message\n                    });\n                    }\n                )\n\n        } else {\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 403,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": \"User validation failed.\"\n            });\n        }\n    });\n   \n}\n\nconst getPromotions = (latMin, latMax, longMin, longMax, date) => \n    Promise.all(_.flatten(_.range(latMin, latMax)\n            .map(lat => _.range(longMin, longMax)\n                .map(long => `${lat},${long}`)))\n        .map(boxKey => \n            dynamoDBService.retrievePromos(date, boxKey)\n                .then(data => data.Items)\n                .then(items => Promise.all(\n                    items.map(promo => \n                    dynamoDBService.getVendor(promo.vendorId)\n                        .then(vendor => ({\n                            ...promo,\n                            imgs: promo.imgUrls,\n                            vendorName: vendor.Items[0].name,\n                        }))\n                )))))\n            .then(_.flatten);\n\nfunction calculateBox(latitude, longitude){\n    let latKey = Math.trunc((latitude + 90) * 10);\n        let longKey = Math.trunc((longitude + 180) * 10);\n        return {lat: latKey, long: longKey};\n}\n\nfunction getNumberOfBoxes(radiusInMeters){\n        let numberOfBoxes = Math.ceil(radiusInMeters / 10000);\n        return numberOfBoxes;\n}\n\n",
         "triggers": [],
         "config": {
           "runtime": "nodejs8.10",
@@ -241,7 +246,7 @@
             "id": "a1c1f5b8-325d-4a2d-8747-c32117f226ba",
             "name": "getPromotions",
             "functionId": "1f94f853-5bdb-41ea-afe7-231da7fae32f",
-            "event": "{\n    \"queryStringParameters\": {\n        \"date\": \"1544180904415\",\n        \"user\": \"cassie\",\n        \"uuid\":\"JFbmO1PZxtUBjtxE3MMYSFzMeKh2\",\n        \"radius\": \"5000\",\n        \"longitude\": \"-122.4064\",\n        \"latitude\": \"37.7858\"\n    }\n}"
+            "event": "{\n    \"queryStringParameters\": {\n        \"date\": \"1547117686903\",\n        \"user\": \"cassie\",\n        \"uuid\":\"JFbmO1PZxtUBjtxE3MMYSFzMeKh2\",\n        \"radius\": \"5000\",\n        \"longitude\": \"79.8713\",\n        \"latitude\": \"6.8266983\"\n    }\n}"
           }
         },
         "customSecurityPolicy": {
@@ -308,7 +313,12 @@
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/addUser.js",
         "code": "let AWS = require('aws-sdk');\nconst cognito_idp = new AWS.CognitoIdentityServiceProvider();\nlet dynamoDBService = require('./dynamoDBService');\nlet utils = require('./utils');\n\nexports.handler = function (event, context, callback) {\n\n    if (utils.authorize(event, callback)) {\n\n        let body = JSON.parse(event.body);\n        let name = body.name;\n        let email = body.email;\n        let phone_number = body.phone_number;\n        let temp_password = body.temp_password;\n        let role = body.role;\n        let vendorId = body.vendor_id;\n\n        cognito_idp.adminCreateUser({\n            UserPoolId: \"us-east-1_mcdTV1jKi\",\n            Username: `${email}`,\n            DesiredDeliveryMediums: [\"EMAIL\", \"SMS\"],\n            ForceAliasCreation: false,\n            TemporaryPassword: `${temp_password}`,\n            UserAttributes: [{\n                Name: \"name\",\n                Value: `${name}`\n            }, {\n                Name: \"email\",\n                Value: `${email}`\n            }, {\n                Name: \"phone_number\",\n                Value: `${phone_number}`\n            }, {\n                Name: \"phone_number_verified\",\n                Value: \"true\"\n            }, {\n                Name: \"email_verified\",\n                Value: \"true\"\n            }],\n            ValidationData: []\n        }, function (error, data) {\n            if (error) {\n                console.log(error);\n                callback(null, {\n                    \"isBase64Encoded\": true,\n                    \"statusCode\": 502,\n                    \"headers\": {\n                        \"Access-Control-Allow-Origin\": \"*\",\n                        \"Access-Control-Allow-Methods\": \"*\"\n                    },\n                    \"body\": error.message\n                });\n            } else {\n                console.log(data);\n                dynamoDBService.addUser({\n                    uid: data.User.Username,\n                    name: name,\n                    role: role,\n                    vendor_id: vendorId\n                }).then(function () {\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 200,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": 'Successfully added vendor with name : ' + name\n                    });\n                }).catch(function (error) {\n                    console.log(error);\n                    callback(null, {\n                        \"isBase64Encoded\": true,\n                        \"statusCode\": 502,\n                        \"headers\": {\n                            \"Access-Control-Allow-Origin\": \"*\",\n                            \"Access-Control-Allow-Methods\": \"*\"\n                        },\n                        \"body\": 'User added to cognito pool but failed to add to dynamo DB. ' + error.message\n                    });\n                });\n\n            }\n        });\n    }\n}",
-        "triggers": [],
+        "triggers": [
+          {
+            "resourceName": "apigusEast1HSVendoruserpost",
+            "config": {}
+          }
+        ],
         "config": {
           "runtime": "nodejs8.10",
           "timeout": 60,
@@ -325,7 +335,12 @@
         "isRemovable": true,
         "filePath": "HotSpaces-Vendor/addVendor.js",
         "code": "let AWS = require('aws-sdk');\nlet dynamoDBService = require('./dynamoDBService');\nlet utils = require('./utils');\n\nexports.handler = function(event, context, callback) {\n    if (utils.authorize(event, callback)) {\n        \n        let body = JSON.parse(event.body);\n        let vendorName = body.name;\n        let vendor = {\n            name: vendorName\n        }\n        dynamoDBService.addVendor(vendor).then(function (data) {\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 200,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": 'Successfully added vendor with name : ' + vendorName\n            });\n        }).catch(function (err) {\n            callback(null, {\n                \"isBase64Encoded\": true,\n                \"statusCode\": 502,\n                \"headers\": {\n                    \"Access-Control-Allow-Origin\": \"*\",\n                    \"Access-Control-Allow-Methods\": \"*\"\n                },\n                \"body\": err.message\n            });\n        });\n    }\n}",
-        "triggers": [],
+        "triggers": [
+          {
+            "resourceName": "apigusEast1HSVendorvendorpost",
+            "config": {}
+          }
+        ],
         "config": {
           "runtime": "nodejs8.10",
           "timeout": 60,
@@ -431,7 +446,6 @@
       "e3525801-37ee-4812-b654-b95f419c079e",
       "98bc0377-64db-471d-a7bf-74451db9bf90",
       "1f94f853-5bdb-41ea-afe7-231da7fae32f",
-      "fee713c1-57ce-4563-8763-b5987d956e02",
       "4ed6d4c5-d54d-482b-b03a-2232e44d86aa"
     ],
     "currentFileId": "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
@@ -441,7 +455,7 @@
         "type": "DynamoDB",
         "config": {
           "mode": 1,
-          "operation": "query",
+          "operation": "scan",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_Promotions",
             "name": "HS_Promotions",
@@ -455,11 +469,10 @@
           "parameters": {
             "TableName": "HS_Promotions",
             "ExpressionAttributeValues": {
-              ":promo": "@{data.promo}",
-              ":vendor": "@{data.vendor}"
+              ":date": "@{date}",
+              ":box": "@{box}"
             },
-            "KeyConditionExpression": "promoId = :promo",
-            "FilterExpression": "vendorId = :vendor"
+            "FilterExpression": "startDate <= :date and endDate >= :date and locationBox = :box"
           },
           "validator": {
             "validatableFields": {},
@@ -513,7 +526,7 @@
             "hasSortKey": false,
             "sortKey": "",
             "sortKeyType": "S",
-            "mode": 0
+            "mode": 1
           },
           "parameters": {
             "TableName": "HS_Vendor",
@@ -839,7 +852,7 @@
         "name": "ddbHSRedeem",
         "type": "DynamoDB",
         "config": {
-          "mode": 0,
+          "mode": 1,
           "operation": "scan",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_Redeem",
@@ -1057,6 +1070,142 @@
           }
         },
         "globallyEditable": true
+      },
+      "apigusEast1HSVendorpromopost": {
+        "name": "apigusEast1HSVendorpromopost",
+        "type": "API_GATEWAY",
+        "config": {
+          "selectedRegion": "us-east-1",
+          "apiMode": 1,
+          "apiName": "HS Vendor",
+          "apiId": "2owdjvd5i7",
+          "endpointType": "REGIONAL",
+          "rootResourceId": "hfkl4vnbka",
+          "existingResources": {
+            "/promo": "3o8456",
+            "/promo/redeems": "3xd0dc",
+            "/vendor/list": "9pwxkc",
+            "/redeem": "d7xwsp",
+            "/": "hfkl4vnbka",
+            "/user": "hupuqk",
+            "/promo/list": "l5jx2m",
+            "/qr": "rcbg6a",
+            "/vendor": "wx8mtf"
+          },
+          "resourceMode": 1,
+          "resourcePath": "/promo",
+          "resourceName": "promo",
+          "resourceId": "3o8456",
+          "restMethod": "POST",
+          "proxyIntegration": true,
+          "enableCORS": true,
+          "stageMode": 1,
+          "stageName": "hotProd",
+          "stageDeploymentId": "i1whiz"
+        },
+        "globallyEditable": false
+      },
+      "apigusEast1HSVendoruserpost": {
+        "name": "apigusEast1HSVendoruserpost",
+        "type": "API_GATEWAY",
+        "config": {
+          "selectedRegion": "us-east-1",
+          "apiMode": 1,
+          "apiName": "HS Vendor",
+          "apiId": "2owdjvd5i7",
+          "endpointType": "REGIONAL",
+          "rootResourceId": "hfkl4vnbka",
+          "existingResources": {
+            "/promo": "3o8456",
+            "/promo/redeems": "3xd0dc",
+            "/vendor/list": "9pwxkc",
+            "/redeem": "d7xwsp",
+            "/": "hfkl4vnbka",
+            "/user": "hupuqk",
+            "/promo/list": "l5jx2m",
+            "/qr": "rcbg6a",
+            "/vendor": "wx8mtf"
+          },
+          "resourceMode": 1,
+          "resourcePath": "/user",
+          "resourceName": "user",
+          "resourceId": "hupuqk",
+          "restMethod": "POST",
+          "proxyIntegration": true,
+          "enableCORS": true,
+          "stageMode": 1,
+          "stageName": "hotProd",
+          "stageDeploymentId": "yzqxnk"
+        },
+        "globallyEditable": false
+      },
+      "apigusEast1HSVendorvendorpost": {
+        "name": "apigusEast1HSVendorvendorpost",
+        "type": "API_GATEWAY",
+        "config": {
+          "selectedRegion": "us-east-1",
+          "apiMode": 1,
+          "apiName": "HS Vendor",
+          "apiId": "2owdjvd5i7",
+          "endpointType": "REGIONAL",
+          "rootResourceId": "hfkl4vnbka",
+          "existingResources": {
+            "/promo": "3o8456",
+            "/promo/redeems": "3xd0dc",
+            "/vendor/list": "9pwxkc",
+            "/redeem": "d7xwsp",
+            "/": "hfkl4vnbka",
+            "/user": "hupuqk",
+            "/promo/list": "l5jx2m",
+            "/qr": "rcbg6a",
+            "/vendor": "wx8mtf"
+          },
+          "resourceMode": 1,
+          "resourcePath": "/vendor",
+          "resourceName": "vendor",
+          "resourceId": "wx8mtf",
+          "restMethod": "POST",
+          "proxyIntegration": true,
+          "enableCORS": true,
+          "stageMode": 1,
+          "stageName": "hotProd",
+          "stageDeploymentId": "1lt8xs"
+        },
+        "globallyEditable": false
+      },
+      "apigusEast1HSVendorqrget": {
+        "name": "apigusEast1HSVendorqrget",
+        "type": "API_GATEWAY",
+        "config": {
+          "selectedRegion": "us-east-1",
+          "apiMode": 1,
+          "apiName": "HS Vendor",
+          "apiId": "2owdjvd5i7",
+          "endpointType": "REGIONAL",
+          "rootResourceId": "hfkl4vnbka",
+          "existingResources": {
+            "/promo": "3o8456",
+            "/promo/redeems": "3xd0dc",
+            "/vendor/list": "9pwxkc",
+            "/redeem": "d7xwsp",
+            "/": "hfkl4vnbka",
+            "/user": "hupuqk",
+            "/promo/list": "l5jx2m",
+            "/qr": "rcbg6a",
+            "/vendor": "wx8mtf"
+          },
+          "resourceMode": 1,
+          "resourcePath": "/qr",
+          "resourceName": "qr",
+          "resourceId": "rcbg6a",
+          "restMethod": "GET",
+          "proxyIntegration": true,
+          "enableCORS": true,
+          "stageMode": 1,
+          "stageName": "hotProd",
+          "stageDeploymentId": "anxjsd"
+        },
+        "globallyEditable": false
       }
     },
     "envVariables": [
@@ -1114,7 +1263,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1547102651776
+    "lastSave": 1547121645238
   },
   "VCS_STATE": {
     "provider": "GitHub",

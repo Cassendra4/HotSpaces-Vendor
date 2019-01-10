@@ -41,7 +41,7 @@ exports.handler = function (event, context, callback) {
 
             getPromotions(latMin, latMax, longMin, longMax, date)
                 .then(data => {
-                    console.log("%%%%", data);
+                    console.log("*****", data);
                     let promoList = data;
                     callback(null, {
                         "isBase64Encoded": true,
@@ -89,7 +89,6 @@ const getPromotions = (latMin, latMax, longMin, longMax, date) =>
             dynamoDBService.retrievePromos(date, boxKey)
                 .then(data => data.Items)
                 .then(items => Promise.all(
-                    
                     items.map(promo => 
                     dynamoDBService.getVendor(promo.vendorId)
                         .then(vendor => ({
