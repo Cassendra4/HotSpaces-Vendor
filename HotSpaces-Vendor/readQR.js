@@ -22,7 +22,7 @@ exports.handler = function (event, context, callback) {
               let promo = {
                     data: promoData.Items[0],
                     user: data.Item.user,
-                    name: 'cassie preston'
+                    name: data.Item.userName
                 };
           let response = {
             "statusCode": 200,
