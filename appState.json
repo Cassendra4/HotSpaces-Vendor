@@ -429,16 +429,19 @@
     "rootNode": "93ffce99-7f73-47ff-958a-0d6e790962d6",
     "openFiles": [
       "e3525801-37ee-4812-b654-b95f419c079e",
-      "98bc0377-64db-471d-a7bf-74451db9bf90"
+      "98bc0377-64db-471d-a7bf-74451db9bf90",
+      "1f94f853-5bdb-41ea-afe7-231da7fae32f",
+      "fee713c1-57ce-4563-8763-b5987d956e02",
+      "4ed6d4c5-d54d-482b-b03a-2232e44d86aa"
     ],
-    "currentFileId": "98bc0377-64db-471d-a7bf-74451db9bf90",
+    "currentFileId": "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
     "resources": {
       "ddbHSPromotions": {
         "name": "ddbHSPromotions",
         "type": "DynamoDB",
         "config": {
           "mode": 1,
-          "operation": "scan",
+          "operation": "delete",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_Promotions",
             "name": "HS_Promotions",
@@ -447,15 +450,14 @@
             "hasSortKey": true,
             "sortKey": "timestamp",
             "sortKeyType": "N",
-            "mode": 0
+            "mode": 1
           },
           "parameters": {
             "TableName": "HS_Promotions",
-            "ExpressionAttributeValues": {
-              ":date": "@{date}",
-              ":box": "@{box}"
-            },
-            "FilterExpression": "startDate <= :date and endDate >= :date and locationBox = :box"
+            "Key": {
+              "promoId": "@{promoData.promoID}",
+              "timestamp": "@{promoData.timestamp}"
+            }
           },
           "validator": {
             "validatableFields": {},
@@ -507,7 +509,7 @@
         "type": "DynamoDB",
         "config": {
           "mode": 1,
-          "operation": "get",
+          "operation": "scan",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_Vendor",
             "name": "HS_Vendor",
@@ -519,10 +521,7 @@
             "mode": 0
           },
           "parameters": {
-            "TableName": "HS_Vendor",
-            "Key": {
-              "vendor_id": "@{vendorId}"
-            }
+            "TableName": "HS_Vendor"
           },
           "validator": {
             "validatableFields": {},
@@ -537,7 +536,7 @@
         "type": "DynamoDB",
         "config": {
           "mode": 1,
-          "operation": "query",
+          "operation": "put",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_User",
             "name": "HS_User",
@@ -550,10 +549,12 @@
           },
           "parameters": {
             "TableName": "HS_User",
-            "ExpressionAttributeValues": {
-              ":user_id": "@{userId}"
-            },
-            "KeyConditionExpression": "user_id = :user_id"
+            "Item": {
+              "user_id": "@{userId}",
+              "name": "@{name}",
+              "role": "@{role}",
+              "vendor_id": "@{vendor_id}"
+            }
           },
           "validator": {
             "validatableFields": {},
@@ -839,7 +840,7 @@
         "name": "ddbHSRedeem",
         "type": "DynamoDB",
         "config": {
-          "mode": 1,
+          "mode": 0,
           "operation": "scan",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_Redeem",
@@ -854,9 +855,10 @@
           "parameters": {
             "TableName": "HS_Redeem",
             "ExpressionAttributeValues": {
-              ":promoId": "@{promoId}"
+              ":promo": "@{data.promo}",
+              ":user": "@{data.userId}"
             },
-            "FilterExpression": "promoId = :promoId"
+            "FilterExpression": "promoId = :promo and userId = :user"
           },
           "validator": {
             "validatableFields": {},
@@ -1114,7 +1116,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1547100765796
+    "lastSave": 1547102053841
   },
   "VCS_STATE": {
     "provider": "GitHub",
