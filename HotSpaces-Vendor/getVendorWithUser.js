@@ -6,7 +6,7 @@ let dynamoDBService = require('./dynamoDBService');
 exports.handler = function (event, context, callback) {
     console.log("aaaaa", event);
     let userData = {};
-    let userId = event.queryStringParameters.userId;
+    let userId = event.queryStringParameters.userid;
     dynamoDBService.getUser(userId)
         .then(function (data) {
             userData["userRole"] = data.Items[0].role;
