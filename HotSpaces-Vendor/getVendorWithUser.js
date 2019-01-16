@@ -50,5 +50,4 @@ exports.handler = function (event, context, callback) {
                 "body": err.message
             })
         });
-
 }
