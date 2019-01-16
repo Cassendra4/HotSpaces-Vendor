@@ -443,12 +443,11 @@
     "deletedFiles": [],
     "rootNode": "93ffce99-7f73-47ff-958a-0d6e790962d6",
     "openFiles": [
-      "e3525801-37ee-4812-b654-b95f419c079e",
-      "98bc0377-64db-471d-a7bf-74451db9bf90",
-      "1f94f853-5bdb-41ea-afe7-231da7fae32f",
-      "4ed6d4c5-d54d-482b-b03a-2232e44d86aa"
+      "507d5999-d6df-45a1-a809-fd4943d3954b",
+      "3fd97c9a-d36d-45cf-bb8d-005324d0a31c",
+      "6569bb1e-03dc-44b0-a26e-907f99bdbcfa"
     ],
-    "currentFileId": "4ed6d4c5-d54d-482b-b03a-2232e44d86aa",
+    "currentFileId": "6569bb1e-03dc-44b0-a26e-907f99bdbcfa",
     "resources": {
       "ddbHSPromotions": {
         "name": "ddbHSPromotions",
@@ -517,7 +516,7 @@
         "type": "DynamoDB",
         "config": {
           "mode": 1,
-          "operation": "query",
+          "operation": "get",
           "table": {
             "arn": "arn:aws:dynamodb:us-east-1:318300609668:table/HS_Vendor",
             "name": "HS_Vendor",
@@ -530,10 +529,9 @@
           },
           "parameters": {
             "TableName": "HS_Vendor",
-            "ExpressionAttributeValues": {
-              ":vendor_id": "@{vendorId}"
-            },
-            "KeyConditionExpression": "vendor_id = :vendor_id"
+            "Key": {
+              "vendor_id": "@{vendorId}"
+            }
           },
           "validator": {
             "validatableFields": {},
@@ -1263,7 +1261,7 @@
     "projectRegion": "us-east-1",
     "platform": "AWS",
     "platformRegions": {},
-    "lastSave": 1547121645238
+    "lastSave": 1547624622218
   },
   "VCS_STATE": {
     "provider": "GitHub",
